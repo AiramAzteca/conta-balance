@@ -8,385 +8,129 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ContaBalance">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="ContaBalance">
-    <meta name="description" content="App de cuadre contable para negocios">
-    
-    <!-- Manifest para instalación PWA -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Iconos para iOS -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a73e8'/><text x='50' y='65' text-anchor='middle' fill='white' font-size='50'>📊</text></svg>">
-    
     <title>ContaBalance - Cuadre Contable</title>
-    
-    <!-- SheetJS para manejo de Excel -->
     <script src="js/xlsx.full.min.js"></script>
-    
     <style>
-        :root {
-            --primary: #1a73e8;
-            --primary-dark: #1557b0;
-            --success: #0f9d58;
-            --danger: #ea4335;
-            --warning: #f4b400;
-            --bg: #f8f9fa;
-            --card: #ffffff;
-            --text: #202124;
-            --text-secondary: #5f6368;
-            --border: #dadce0;
-            --safe-bottom: env(safe-area-inset-bottom, 16px);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 16px;
-            padding-bottom: calc(16px + var(--safe-bottom));
-            color: var(--text);
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-            overscroll-behavior: none;
+            color: #202124;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            color: var(--primary);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .install-banner {
-            background: var(--primary);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            animation: slideDown 0.3s ease;
-        }
-
-        .install-banner.show {
-            display: flex;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .date-range {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 12px;
-            align-items: end;
-        }
-
-        .date-input {
-            padding: 12px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 16px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: white;
-        }
-
+        .container { max-width: 800px; margin: 0 auto; }
         .card {
-            background: var(--card);
+            background: white;
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
-        .card h2 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
+        .card h2 { color: #1a73e8; margin-bottom: 16px; font-size: 20px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #5f6368; font-size: 14px; }
         .form-control {
             width: 100%;
-            padding: 14px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
+            padding: 12px;
+            border: 2px solid #dadce0;
+            border-radius: 10px;
             font-size: 16px;
-            transition: all 0.3s;
-            background: white;
-            -webkit-appearance: none;
-            appearance: none;
         }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
-        }
-
-        select.form-control {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235f6368' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 40px;
-        }
-
+        .form-control:focus { outline: none; border-color: #1a73e8; }
+        select.form-control { background: white; }
         .btn {
-            padding: 14px 24px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            white-space: nowrap;
+            transition: all 0.2s;
         }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            box-shadow: 0 4px 12px rgba(26,115,232,0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-
-        .btn-block {
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-            font-size: 14px;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        th {
-            background: var(--primary);
-            color: white;
-            padding: 14px 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        td {
-            padding: 14px 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: #1a73e8; color: white; width: 100%; margin-top: 8px; }
+        .btn-success { background: #0f9d58; color: white; padding: 8px 14px; font-size: 13px; }
+        .btn-danger { background: #ea4335; color: white; padding: 6px 10px; font-size: 12px; }
+        .btn-warning { background: #f4b400; color: white; padding: 6px 10px; font-size: 12px; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+        th { background: #1a73e8; color: white; padding: 10px 8px; text-align: left; font-weight: 600; cursor: pointer; }
+        th:hover { background: #1557b0; }
+        td { padding: 10px 8px; border-bottom: 1px solid #dadce0; }
+        tr:hover { background: #f8f9fa; }
         .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: 600;
             display: inline-block;
         }
-
         .badge-success { background: #e6f4ea; color: #1e7e34; }
         .badge-primary { background: #e8f0fe; color: #1a73e8; }
         .badge-warning { background: #fef7e0; color: #f9ab00; }
-
-        .total-row {
-            font-weight: bold;
-            font-size: 16px;
-            background: #e8f0fe;
-        }
-
-        .total-row td {
-            border-top: 2px solid var(--primary);
-        }
-
-        .file-input { display: none; }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
-        }
-
+        .total-row { font-weight: bold; background: #e8f0fe; }
+        .total-row td { border-top: 2px solid #1a73e8; }
+        .tabs { display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; }
         .tab {
-            padding: 12px 20px;
+            padding: 10px 16px;
             border: none;
             background: rgba(255,255,255,0.9);
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
             white-space: nowrap;
             font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 13px;
         }
-
-        .tab.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 8px rgba(26,115,232,0.3);
+        .tab.active { background: #1a73e8; color: white; }
+        .search-box { margin-bottom: 14px; }
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dadce0;
+            border-radius: 10px;
+            font-size: 15px;
         }
-
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .summary-card {
-            padding: 16px;
+        .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+        .filter-chip {
+            padding: 6px 12px;
             border-radius: 16px;
-            text-align: center;
-        }
-
-        .summary-card .label {
             font-size: 12px;
-            color: #5f6368;
-            margin-bottom: 4px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: 2px solid #dadce0;
+            background: white;
         }
-
-        .summary-card .value {
-            font-size: 28px;
-            font-weight: bold;
+        .filter-chip.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+        .edit-input {
+            width: 70px;
+            padding: 4px;
+            border: 2px solid #1a73e8;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
         }
-
+        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+        .summary-card { padding: 14px; border-radius: 14px; text-align: center; }
+        .summary-card .label { font-size: 11px; color: #5f6368; font-weight: 600; }
+        .summary-card .value { font-size: 22px; font-weight: bold; margin-top: 4px; }
         .card-efectivo { background: #e8f0fe; }
         .card-efectivo .value { color: #1a73e8; }
         .card-transferencia { background: #e6f4ea; }
         .card-transferencia .value { color: #0f9d58; }
         .card-total { background: #fef7e0; }
         .card-total .value { color: #f4b400; }
-
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 12px;
-            background: white;
-        }
-
-        .offline-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: #e6f4ea;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #1e7e34;
-        }
-
-        .offline-badge::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: #1e7e34;
-            border-radius: 50%;
+        .unidad-badge {
             display: inline-block;
+            padding: 2px 6px;
+            background: #f1f3f4;
+            border-radius: 10px;
+            font-size: 11px;
+            color: #5f6368;
         }
-
-        /* Toast notification */
+        .table-container { overflow-x: auto; border-radius: 10px; }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -394,104 +138,58 @@
             transform: translateX(-50%);
             background: #333;
             color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
+            padding: 10px 20px;
+            border-radius: 20px;
             font-weight: 600;
             z-index: 1000;
-            animation: toastIn 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: fadeIn 0.3s;
         }
-
-        @keyframes toastIn {
-            from { transform: translateX(-50%) translateY(100%); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
-
-        @keyframes toastOut {
-            from { transform: translateX(-50%) translateY(0); opacity: 1; }
-            to { transform: translateX(-50%) translateY(100%); opacity: 0; }
-        }
-
+        .empty-state { text-align: center; padding: 30px; color: #5f6368; }
         @media (max-width: 600px) {
-            body {
-                padding: 12px;
-                padding-bottom: calc(12px + var(--safe-bottom));
-            }
-            
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                text-align: center;
-            }
-            
-            .header-actions {
-                justify-content: center;
-            }
-            
-            .date-range {
-                grid-template-columns: 1fr;
-            }
-            
-            .tab {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-            
-            .btn {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
+            .summary-cards { grid-template-columns: 1fr; }
+            body { padding: 10px; }
         }
     </style>
 </head>
 <body>
-    <!-- Banner de instalación -->
-    <div class="install-banner" id="installBanner">
-        <span>📲 Instala la app para acceso rápido</span>
-        <button class="btn btn-sm" style="background: white; color: var(--primary);" onclick="instalarApp()">
-            Instalar
-        </button>
-    </div>
-
     <div class="container">
-        <!-- Encabezado -->
-        <div class="header">
-            <h1>📊 ContaBalance</h1>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <span class="offline-badge">Offline</span>
-                <div class="header-actions">
-                    <button class="btn btn-primary btn-sm" onclick="exportarExcel()">📥</button>
-                    <button class="btn btn-success btn-sm" onclick="document.getElementById('fileInput').click()">📤</button>
-                </div>
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h1 style="color: #1a73e8; font-size: 22px; margin: 0;">📊 ContaBalance</h1>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-success btn-sm" onclick="exportarExcel()">📥 Exportar</button>
+                <button class="btn btn-success btn-sm" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
             </div>
-            <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" onchange="importarExcel(event)">
+            <input type="file" id="fileInput" style="display: none;" accept=".xlsx,.xls" onchange="importarExcel(event)">
         </div>
 
-        <!-- Rango de Fechas -->
-        <div class="date-range">
-            <div>
-                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Desde</label>
-                <input type="date" id="fechaInicio" class="date-input" onchange="actualizarCuadre()" style="width: 100%;">
+        <div class="card" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: end;">
+            <div style="flex: 1; min-width: 120px;">
+                <label style="font-size: 12px; font-weight: 600; color: #5f6368;">Desde</label>
+                <input type="date" id="fechaInicio" class="form-control" onchange="actualizarCuadre()">
             </div>
-            <div>
-                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Hasta</label>
-                <input type="date" id="fechaFin" class="date-input" onchange="actualizarCuadre()" style="width: 100%;">
+            <div style="flex: 1; min-width: 120px;">
+                <label style="font-size: 12px; font-weight: 600; color: #5f6368;">Hasta</label>
+                <input type="date" id="fechaFin" class="form-control" onchange="actualizarCuadre()">
             </div>
-            <button class="btn btn-primary" onclick="actualizarCuadre()">🔄 Actualizar</button>
+            <button class="btn btn-primary" style="width: auto; margin: 0;" onclick="actualizarCuadre()">🔄 Actualizar</button>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs">
             <button class="tab active" onclick="cambiarTab('registro', this)">📝 Registro</button>
             <button class="tab" onclick="cambiarTab('productos', this)">📦 Productos</button>
             <button class="tab" onclick="cambiarTab('cuadre', this)">📊 Cuadre</button>
+            <button class="tab" onclick="cambiarTab('buscar', this)">🔍 Buscar</button>
         </div>
 
-        <!-- Panel de Registro -->
+        <!-- PANEL REGISTRO -->
         <div id="panelRegistro" class="card">
             <h2>📝 Nueva Transacción</h2>
             <div class="form-group">
-                <label>Tipo de Transacción</label>
+                <label>Tipo</label>
                 <select id="tipoTransaccion" class="form-control" onchange="actualizarFormulario()">
                     <option value="ENTRADA_PRODUCTO">📥 Entrada de Producto</option>
                     <option value="VENTA">💰 Venta</option>
@@ -499,24 +197,20 @@
                     <option value="ENTRADA_TRANSFERENCIA">🏦 Entrada por Transferencia</option>
                 </select>
             </div>
-            
             <div id="campoProducto" class="form-group">
                 <label>Producto</label>
-                <select id="productoId" class="form-control">
+                <select id="productoId" class="form-control" onchange="autoCalcularMonto()">
                     <option value="">Seleccionar producto</option>
                 </select>
             </div>
-            
             <div class="form-group">
                 <label>Cantidad</label>
-                <input type="number" id="cantidad" class="form-control" min="1" value="1" placeholder="Cantidad">
+                <input type="number" id="cantidad" class="form-control" min="1" value="1" onchange="autoCalcularMonto()" oninput="autoCalcularMonto()">
             </div>
-            
             <div class="form-group">
-                <label>Monto Total</label>
+                <label>Monto Total <span id="montoSugerido" style="color: #1a73e8; font-weight: normal; font-size: 13px;"></span></label>
                 <input type="number" id="monto" class="form-control" step="0.01" placeholder="0.00">
             </div>
-            
             <div id="campoMetodoPago" class="form-group" style="display: none;">
                 <label>Método de Pago</label>
                 <select id="metodoPago" class="form-control">
@@ -524,179 +218,175 @@
                     <option value="TRANSFERENCIA">🏦 Transferencia</option>
                 </select>
             </div>
-            
             <div class="form-group">
-                <label>Concepto / Notas</label>
-                <input type="text" id="concepto" class="form-control" placeholder="Concepto o nota adicional">
+                <label>Concepto</label>
+                <input type="text" id="concepto" class="form-control" placeholder="Nota opcional">
             </div>
-            
-            <button class="btn btn-primary btn-block" onclick="registrarTransaccion()">
-                ✅ Registrar Transacción
-            </button>
+            <button class="btn btn-primary" onclick="registrarTransaccion()">✅ Registrar</button>
         </div>
 
-        <!-- Panel de Productos -->
+        <!-- PANEL PRODUCTOS -->
         <div id="panelProductos" class="card" style="display: none;">
             <h2>📦 Agregar Producto</h2>
             <div class="form-group">
-                <label>Nombre del Producto</label>
-                <input type="text" id="nombreProducto" class="form-control" placeholder="Nombre del producto">
+                <label>Nombre del Producto *</label>
+                <input type="text" id="nombreProducto" class="form-control" placeholder="Ej: Arroz">
             </div>
-            
             <div class="form-group">
-                <label>Valor Unitario</label>
-                <input type="number" id="valorUnitario" class="form-control" step="0.01" placeholder="Precio por unidad">
+                <label>Precio por Unidad ($) *</label>
+                <input type="number" id="valorUnitario" class="form-control" step="0.01" placeholder="Ej: 25.50">
             </div>
-            
+            <div class="form-group">
+                <label>Unidad de Medida</label>
+                <select id="unidadMedida" class="form-control">
+                    <option value="Unidad">Unidad (u)</option>
+                    <option value="Kilogramo">Kilogramo (kg)</option>
+                    <option value="Gramo">Gramo (g)</option>
+                    <option value="Litro">Litro (L)</option>
+                    <option value="Mililitro">Mililitro (ml)</option>
+                    <option value="Metro">Metro (m)</option>
+                    <option value="Par">Par</option>
+                    <option value="Docena">Docena</option>
+                    <option value="Caja">Caja</option>
+                    <option value="Paquete">Paquete</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label>Stock Inicial</label>
                 <input type="number" id="stockInicial" class="form-control" min="0" value="0">
             </div>
-            
-            <button class="btn btn-primary btn-block" onclick="agregarProducto()">
-                📦 Agregar Producto
-            </button>
-            
-            <h2 style="margin-top: 24px;">Productos Registrados</h2>
+            <button class="btn btn-primary" onclick="agregarProducto()">📦 Agregar Producto</button>
+
+            <h2 style="margin-top: 20px;">Lista de Productos</h2>
+            <div class="search-box">
+                <input type="text" id="busquedaProductos" class="form-control" placeholder="🔍 Buscar productos..." oninput="actualizarListaProductos()">
+            </div>
+            <div class="filter-chips">
+                <span class="filter-chip active" onclick="setFiltroProducto('todos', this)">Todos</span>
+                <span class="filter-chip" onclick="setFiltroProducto('conStock', this)">Con Stock</span>
+                <span class="filter-chip" onclick="setFiltroProducto('sinStock', this)">Sin Stock</span>
+            </div>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Producto</th>
-                            <th>Valor</th>
-                            <th>Stock</th>
+                            <th onclick="ordenarProductos('nombre')">Producto ↕️</th>
+                            <th onclick="ordenarProductos('valor')">Precio ↕️</th>
+                            <th>Unidad</th>
+                            <th onclick="ordenarProductos('stock')">Stock ↕️</th>
                             <th>Acción</th>
                         </tr>
                     </thead>
-                    <tbody id="tablaProductos">
-                        <tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No hay productos registrados</td></tr>
-                    </tbody>
+                    <tbody id="tablaProductos"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Panel de Cuadre -->
+        <!-- PANEL CUADRE -->
         <div id="panelCuadre" class="card" style="display: none;">
             <h2>📊 Cuadre del Período</h2>
-            
             <div class="summary-cards">
                 <div class="summary-card card-efectivo">
-                    <div class="label">Total Efectivo</div>
-                    <div class="value" id="totalEfectivo">$0.00</div>
+                    <div class="label">Efectivo</div>
+                    <div class="value" id="totalEfectivo">$0</div>
                 </div>
                 <div class="summary-card card-transferencia">
-                    <div class="label">Total Transferencia</div>
-                    <div class="value" id="totalTransferencia">$0.00</div>
+                    <div class="label">Transferencia</div>
+                    <div class="value" id="totalTransferencia">$0</div>
                 </div>
                 <div class="summary-card card-total">
-                    <div class="label">Total General</div>
-                    <div class="value" id="totalGeneral">$0.00</div>
+                    <div class="label">Total</div>
+                    <div class="value" id="totalGeneral">$0</div>
                 </div>
             </div>
-            
             <h3>Detalle por Producto</h3>
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Stock Inicial</th>
-                            <th>Entradas</th>
-                            <th>Ventas</th>
-                            <th>Stock Final</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaCuadre">
-                        <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Seleccione un rango de fechas</td></tr>
-                    </tbody>
+                    <thead><tr><th>Producto</th><th>Stock Inicial</th><th>Entradas</th><th>Ventas</th><th>Stock Final</th><th>Subtotal</th></tr></thead>
+                    <tbody id="tablaCuadre"></tbody>
                 </table>
             </div>
-            
-            <h3 style="margin-top: 24px;">Últimas Transacciones</h3>
+            <h3 style="margin-top: 16px;">Transacciones</h3>
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaTransacciones">
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No hay transacciones en este período</td></tr>
-                    </tbody>
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Monto</th></tr></thead>
+                    <tbody id="tablaTransacciones"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PANEL BÚSQUEDA -->
+        <div id="panelBuscar" class="card" style="display: none;">
+            <h2>🔍 Búsqueda Avanzada</h2>
+            <div class="search-box">
+                <input type="text" id="busquedaGlobal" class="form-control" placeholder="🔍 Buscar por producto, monto, concepto..." oninput="busquedaAvanzada()">
+            </div>
+            <div class="filter-chips">
+                <span class="filter-chip active" onclick="setFiltroBusqueda('todas', this)">Todas</span>
+                <span class="filter-chip" onclick="setFiltroBusqueda('ENTRADA_PRODUCTO', this)">📥 Entradas</span>
+                <span class="filter-chip" onclick="setFiltroBusqueda('VENTA', this)">💰 Ventas</span>
+                <span class="filter-chip" onclick="setFiltroBusqueda('EFECTIVO', this)">💵 Efectivo</span>
+                <span class="filter-chip" onclick="setFiltroBusqueda('TRANSFERENCIA', this)">🏦 Transferencia</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-group">
+                    <label>Producto</label>
+                    <select id="filtroProducto" class="form-control" onchange="busquedaAvanzada()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Unidad</label>
+                    <select id="filtroUnidad" class="form-control" onchange="busquedaAvanzada()">
+                        <option value="">Todas</option>
+                        <option value="Unidad">Unidad</option>
+                        <option value="Kilogramo">Kilogramo</option>
+                        <option value="Litro">Litro</option>
+                        <option value="Par">Par</option>
+                        <option value="Docena">Docena</option>
+                        <option value="Caja">Caja</option>
+                        <option value="Paquete">Paquete</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-group">
+                    <label>Monto Mínimo</label>
+                    <input type="number" id="montoMin" class="form-control" placeholder="0" onchange="busquedaAvanzada()">
+                </div>
+                <div class="form-group">
+                    <label>Monto Máximo</label>
+                    <input type="number" id="montoMax" class="form-control" placeholder="999999" onchange="busquedaAvanzada()">
+                </div>
+            </div>
+            <p style="margin-bottom: 10px; font-weight: 600;">Resultados: <span id="contadorResultados">0</span></p>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Monto</th><th>Unidad</th></tr></thead>
+                    <tbody id="tablaBusqueda"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // REGISTRO DEL SERVICE WORKER PARA OFFLINE
-        // ============================================
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('✅ Service Worker registrado:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('❌ Service Worker falló:', error);
-                    });
-            });
-        }
+        // ==================== BASE DE DATOS ====================
+        let DB = { productos: [], transacciones: [] };
+        let filtroProductoActual = 'todos';
+        let ordenProductoActual = { campo: 'nombre', asc: true };
+        let filtroBusquedaActual = 'todas';
 
-        // ============================================
-        // VARIABLE PARA INSTALACIÓN PWA
-        // ============================================
-        let deferredPrompt;
-        const installBanner = document.getElementById('installBanner');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBanner.classList.add('show');
-        });
-
-        window.addEventListener('appinstalled', () => {
-            installBanner.classList.remove('show');
-            deferredPrompt = null;
-            mostrarToast('✅ App instalada exitosamente');
-        });
-
-        function instalarApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuario aceptó instalar');
-                    }
-                    deferredPrompt = null;
-                    installBanner.classList.remove('show');
-                });
-            }
-        }
-
-        // ============================================
-        // BASE DE DATOS LOCAL
-        // ============================================
-        let DB = {
-            productos: [],
-            transacciones: []
-        };
-
+        // Cargar datos del localStorage
         function cargarDatos() {
-            const datosGuardados = localStorage.getItem('contaBalanceDB');
-            if (datosGuardados) {
-                DB = JSON.parse(datosGuardados);
+            const guardado = localStorage.getItem('contaBalanceDB');
+            if (guardado) {
+                DB = JSON.parse(guardado);
             } else {
+                // Datos de ejemplo iniciales
                 DB.productos = [
-                    { id: 1, nombre: 'Camiseta Básica', valor: 15.00, stock: 50 },
-                    { id: 2, nombre: 'Pantalón Jeans', valor: 35.00, stock: 30 },
-                    { id: 3, nombre: 'Zapatos Deportivos', valor: 45.00, stock: 20 }
+                    { id: 1, nombre: 'Camiseta Básica', valor: 15.00, stock: 50, unidad: 'Unidad' },
+                    { id: 2, nombre: 'Pantalón Jeans', valor: 35.00, stock: 30, unidad: 'Unidad' },
+                    { id: 3, nombre: 'Zapatos Deportivos', valor: 45.00, stock: 20, unidad: 'Par' }
                 ];
                 DB.transacciones = [];
                 guardarDatos();
@@ -707,418 +397,573 @@
             localStorage.setItem('contaBalanceDB', JSON.stringify(DB));
         }
 
-        function formatearFecha(fecha) {
-            return fecha.toISOString().split('T')[0];
+        function mostrarToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2000);
         }
 
-        function mostrarToast(mensaje) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = mensaje;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'toastOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
-        }
-
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
+        // ==================== INICIALIZACIÓN ====================
         function init() {
             cargarDatos();
-            
             const hoy = new Date();
-            const haceUnaSemana = new Date(hoy);
-            haceUnaSemana.setDate(hoy.getDate() - 7);
-            
-            document.getElementById('fechaInicio').value = formatearFecha(haceUnaSemana);
-            document.getElementById('fechaFin').value = formatearFecha(hoy);
-            
+            const inicio = new Date(hoy);
+            inicio.setDate(hoy.getDate() - 7);
+            document.getElementById('fechaInicio').value = inicio.toISOString().split('T')[0];
+            document.getElementById('fechaFin').value = hoy.toISOString().split('T')[0];
             actualizarFormulario();
-            cargarProductosSelect();
+            cargarSelectProductos();
+            cargarFiltroProductos();
             actualizarCuadre();
             actualizarListaProductos();
         }
 
-        // ============================================
-        // NAVEGACIÓN POR TABS
-        // ============================================
-        function cambiarTab(tab, element) {
+        // ==================== NAVEGACIÓN ====================
+        function cambiarTab(tab, el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            element.classList.add('active');
+            el.classList.add('active');
+            document.querySelectorAll('[id^="panel"]').forEach(p => p.style.display = 'none');
+            document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
             
-            document.getElementById('panelRegistro').style.display = 'none';
-            document.getElementById('panelProductos').style.display = 'none';
-            document.getElementById('panelCuadre').style.display = 'none';
-            
-            switch(tab) {
-                case 'registro':
-                    document.getElementById('panelRegistro').style.display = 'block';
-                    break;
-                case 'productos':
-                    document.getElementById('panelProductos').style.display = 'block';
-                    actualizarListaProductos();
-                    break;
-                case 'cuadre':
-                    document.getElementById('panelCuadre').style.display = 'block';
-                    actualizarCuadre();
-                    break;
-            }
+            if (tab === 'productos') actualizarListaProductos();
+            if (tab === 'cuadre') actualizarCuadre();
+            if (tab === 'buscar') { cargarFiltroProductos(); busquedaAvanzada(); }
         }
 
-        // ============================================
-        // FORMULARIO DINÁMICO
-        // ============================================
+        // ==================== FORMULARIO REGISTRO ====================
         function actualizarFormulario() {
             const tipo = document.getElementById('tipoTransaccion').value;
-            const campoProducto = document.getElementById('campoProducto');
-            const campoMetodoPago = document.getElementById('campoMetodoPago');
-            const cantidad = document.getElementById('cantidad');
-            
-            if (tipo === 'ENTRADA_EFECTIVO' || tipo === 'ENTRADA_TRANSFERENCIA') {
-                campoProducto.style.display = 'none';
-                campoMetodoPago.style.display = 'none';
-                cantidad.value = 1;
-                cantidad.readOnly = true;
-            } else {
-                campoProducto.style.display = 'block';
-                campoMetodoPago.style.display = tipo === 'VENTA' ? 'block' : 'none';
-                cantidad.readOnly = false;
-            }
-            
+            document.getElementById('campoProducto').style.display = (tipo === 'ENTRADA_EFECTIVO' || tipo === 'ENTRADA_TRANSFERENCIA') ? 'none' : 'block';
+            document.getElementById('campoMetodoPago').style.display = (tipo === 'VENTA') ? 'block' : 'none';
+            document.getElementById('cantidad').readOnly = (tipo === 'ENTRADA_EFECTIVO' || tipo === 'ENTRADA_TRANSFERENCIA');
+            if (tipo === 'ENTRADA_EFECTIVO' || tipo === 'ENTRADA_TRANSFERENCIA') document.getElementById('cantidad').value = 1;
             document.getElementById('monto').value = '';
-            document.getElementById('concepto').value = '';
+            document.getElementById('montoSugerido').textContent = '';
         }
 
-        function cargarProductosSelect() {
+        function cargarSelectProductos() {
             const select = document.getElementById('productoId');
             select.innerHTML = '<option value="">Seleccionar producto</option>';
             DB.productos.forEach(p => {
-                select.innerHTML += `<option value="${p.id}">${p.nombre} - $${p.valor.toFixed(2)}</option>`;
+                select.innerHTML += `<option value="${p.id}">${p.nombre} - $${p.valor.toFixed(2)}/${p.unidad}</option>`;
             });
         }
 
-        // ============================================
-        // GESTIÓN DE PRODUCTOS
-        // ============================================
+        function autoCalcularMonto() {
+            const tipo = document.getElementById('tipoTransaccion').value;
+            const prodId = document.getElementById('productoId').value;
+            const cant = parseInt(document.getElementById('cantidad').value) || 1;
+            
+            if ((tipo === 'VENTA' || tipo === 'ENTRADA_PRODUCTO') && prodId) {
+                const prod = DB.productos.find(p => p.id == prodId);
+                if (prod) {
+                    const total = prod.valor * cant;
+                    document.getElementById('monto').value = total.toFixed(2);
+                    document.getElementById('montoSugerido').textContent = `(${cant} × $${prod.valor.toFixed(2)} = $${total.toFixed(2)})`;
+                }
+            }
+        }
+
+        function registrarTransaccion() {
+            const tipo = document.getElementById('tipoTransaccion').value;
+            const prodId = document.getElementById('productoId').value;
+            const cant = parseInt(document.getElementById('cantidad').value);
+            const monto = parseFloat(document.getElementById('monto').value);
+            const metodo = document.getElementById('metodoPago').value;
+            const concepto = document.getElementById('concepto').value.trim();
+
+            if (!monto || monto <= 0) { mostrarToast('⚠️ Ingrese un monto válido'); return; }
+            if ((tipo === 'ENTRADA_PRODUCTO' || tipo === 'VENTA') && !prodId) { mostrarToast('⚠️ Seleccione un producto'); return; }
+
+            const prod = DB.productos.find(p => p.id == prodId);
+
+            if (tipo === 'ENTRADA_PRODUCTO' && prod) prod.stock += cant;
+            else if (tipo === 'VENTA' && prod) {
+                if (prod.stock < cant) { mostrarToast('⚠️ Stock insuficiente. Hay: ' + prod.stock); return; }
+                prod.stock -= cant;
+            }
+
+            DB.transacciones.push({
+                id: Date.now(),
+                tipo: tipo,
+                productoId: prodId,
+                productoNombre: prod ? prod.nombre : '',
+                productoUnidad: prod ? prod.unidad : '',
+                cantidad: cant,
+                monto: monto,
+                metodoPago: tipo === 'VENTA' ? metodo : (tipo === 'ENTRADA_EFECTIVO' ? 'EFECTIVO' : tipo === 'ENTRADA_TRANSFERENCIA' ? 'TRANSFERENCIA' : ''),
+                concepto: concepto,
+                fecha: new Date().toISOString(),
+                valorUnitario: prod ? prod.valor : 0
+            });
+
+            guardarDatos();
+            document.getElementById('monto').value = '';
+            document.getElementById('concepto').value = '';
+            document.getElementById('cantidad').value = '1';
+            document.getElementById('montoSugerido').textContent = '';
+            mostrarToast('✅ Transacción registrada');
+            actualizarCuadre();
+            cargarSelectProductos();
+        }
+
+        // ==================== PRODUCTOS ====================
         function agregarProducto() {
             const nombre = document.getElementById('nombreProducto').value.trim();
             const valor = parseFloat(document.getElementById('valorUnitario').value);
-            const stockInicial = parseInt(document.getElementById('stockInicial').value) || 0;
-            
-            if (!nombre || !valor) {
-                mostrarToast('⚠️ Complete nombre y valor del producto');
-                return;
-            }
-            
-            DB.productos.push({
-                id: Date.now(),
-                nombre: nombre,
-                valor: valor,
-                stock: stockInicial
-            });
-            
+            const unidad = document.getElementById('unidadMedida').value;
+            const stock = parseInt(document.getElementById('stockInicial').value) || 0;
+
+            if (!nombre) { mostrarToast('⚠️ Ingrese el nombre del producto'); return; }
+            if (!valor || valor <= 0) { mostrarToast('⚠️ Ingrese un precio válido'); return; }
+
+            DB.productos.push({ id: Date.now(), nombre, valor, unidad, stock });
             guardarDatos();
-            
             document.getElementById('nombreProducto').value = '';
             document.getElementById('valorUnitario').value = '';
             document.getElementById('stockInicial').value = '0';
-            
-            cargarProductosSelect();
+            cargarSelectProductos();
+            cargarFiltroProductos();
             actualizarListaProductos();
-            mostrarToast('✅ Producto agregado exitosamente');
+            mostrarToast('✅ Producto agregado');
+        }
+
+        function setFiltroProducto(filtro, el) {
+            document.querySelectorAll('#panelProductos .filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            filtroProductoActual = filtro;
+            actualizarListaProductos();
+        }
+
+        function ordenarProductos(campo) {
+            if (ordenProductoActual.campo === campo) {
+                ordenProductoActual.asc = !ordenProductoActual.asc;
+            } else {
+                ordenProductoActual.campo = campo;
+                ordenProductoActual.asc = true;
+            }
+            actualizarListaProductos();
         }
 
         function actualizarListaProductos() {
+            const busqueda = (document.getElementById('busquedaProductos')?.value || '').toLowerCase();
+            let productos = [...DB.productos];
+
+            if (filtroProductoActual === 'conStock') productos = productos.filter(p => p.stock > 0);
+            else if (filtroProductoActual === 'sinStock') productos = productos.filter(p => p.stock === 0);
+
+            if (busqueda) {
+                productos = productos.filter(p => 
+                    p.nombre.toLowerCase().includes(busqueda) ||
+                    p.unidad.toLowerCase().includes(busqueda) ||
+                    p.valor.toString().includes(busqueda)
+                );
+            }
+
+            productos.sort((a, b) => {
+                let va = a[ordenProductoActual.campo];
+                let vb = b[ordenProductoActual.campo];
+                if (typeof va === 'string') va = va.toLowerCase();
+                if (typeof vb === 'string') vb = vb.toLowerCase();
+                if (va < vb) return ordenProductoActual.asc ? -1 : 1;
+                if (va > vb) return ordenProductoActual.asc ? 1 : -1;
+                return 0;
+            });
+
             const tbody = document.getElementById('tablaProductos');
-            if (DB.productos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No hay productos registrados</td></tr>';
+            if (productos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No se encontraron productos</td></tr>';
                 return;
             }
-            
-            tbody.innerHTML = DB.productos.map(p => `
+
+            tbody.innerHTML = productos.map(p => `
                 <tr>
                     <td><strong>${p.nombre}</strong></td>
-                    <td>$${p.valor.toFixed(2)}</td>
-                    <td>${p.stock}</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.id})">🗑️</button></td>
+                    <td><input type="number" class="edit-input" value="${p.valor}" onchange="editarProducto(${p.id}, 'valor', this.value)" step="0.01"></td>
+                    <td><span class="unidad-badge">${p.unidad}</span></td>
+                    <td><input type="number" class="edit-input" value="${p.stock}" onchange="editarProducto(${p.id}, 'stock', this.value)"></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editarProductoCompleto(${p.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.id})">🗑️</button>
+                    </td>
                 </tr>
             `).join('');
         }
 
-        function eliminarProducto(id) {
-            if (confirm('¿Eliminar este producto?')) {
-                DB.productos = DB.productos.filter(p => p.id !== id);
-                guardarDatos();
-                cargarProductosSelect();
-                actualizarListaProductos();
-                mostrarToast('🗑️ Producto eliminado');
-            }
-        }
-
-        // ============================================
-        // REGISTRO DE TRANSACCIONES
-        // ============================================
-        function registrarTransaccion() {
-            const tipo = document.getElementById('tipoTransaccion').value;
-            const productoId = document.getElementById('productoId').value;
-            const cantidad = parseInt(document.getElementById('cantidad').value);
-            const monto = parseFloat(document.getElementById('monto').value);
-            const metodoPago = document.getElementById('metodoPago').value;
-            const concepto = document.getElementById('concepto').value.trim();
-            
-            if (!monto || monto <= 0) {
-                mostrarToast('⚠️ Ingrese un monto válido');
-                return;
-            }
-            
-            if ((tipo === 'ENTRADA_PRODUCTO' || tipo === 'VENTA') && !productoId) {
-                mostrarToast('⚠️ Seleccione un producto');
-                return;
-            }
-            
-            const producto = DB.productos.find(p => p.id == productoId);
-            
-            if (tipo === 'ENTRADA_PRODUCTO' && producto) {
-                producto.stock += cantidad;
-            } else if (tipo === 'VENTA' && producto) {
-                if (producto.stock < cantidad) {
-                    mostrarToast('⚠️ Stock insuficiente. Disponible: ' + producto.stock);
-                    return;
-                }
-                producto.stock -= cantidad;
-            }
-            
-            const transaccion = {
-                id: Date.now(),
-                tipo: tipo,
-                productoId: productoId,
-                productoNombre: producto ? producto.nombre : '',
-                cantidad: cantidad,
-                monto: monto,
-                metodoPago: tipo === 'VENTA' ? metodoPago : (tipo === 'ENTRADA_EFECTIVO' ? 'EFECTIVO' : tipo === 'ENTRADA_TRANSFERENCIA' ? 'TRANSFERENCIA' : ''),
-                concepto: concepto,
-                fecha: new Date().toISOString(),
-                valorUnitario: producto ? producto.valor : 0
-            };
-            
-            DB.transacciones.push(transaccion);
+        function editarProducto(id, campo, valor) {
+            const prod = DB.productos.find(p => p.id === id);
+            if (!prod) return;
+            if (campo === 'valor') prod.valor = parseFloat(valor) || 0;
+            else if (campo === 'stock') prod.stock = parseInt(valor) || 0;
             guardarDatos();
-            
-            document.getElementById('monto').value = '';
-            document.getElementById('concepto').value = '';
-            document.getElementById('cantidad').value = '1';
-            
-            mostrarToast('✅ Transacción registrada exitosamente');
+            cargarSelectProductos();
             actualizarCuadre();
-            cargarProductosSelect();
+            mostrarToast('✅ Producto actualizado');
         }
 
-        // ============================================
-        // CUADRE Y REPORTES
-        // ============================================
+        function editarProductoCompleto(id) {
+            const prod = DB.productos.find(p => p.id === id);
+            if (!prod) return;
+            const nombre = prompt('Nombre:', prod.nombre);
+            if (nombre === null) return;
+            const valor = prompt('Precio unitario:', prod.valor);
+            if (valor === null) return;
+            const unidad = prompt('Unidad:', prod.unidad);
+            if (unidad === null) return;
+            const stock = prompt('Stock:', prod.stock);
+            if (stock === null) return;
+            prod.nombre = nombre.trim() || prod.nombre;
+            prod.valor = parseFloat(valor) || prod.valor;
+            prod.unidad = unidad.trim() || prod.unidad;
+            prod.stock = parseInt(stock) || prod.stock;
+            guardarDatos();
+            cargarSelectProductos();
+            cargarFiltroProductos();
+            actualizarListaProductos();
+            actualizarCuadre();
+            mostrarToast('✅ Producto actualizado');
+        }
+
+        function eliminarProducto(id) {
+            if (!confirm('¿Eliminar este producto?')) return;
+            DB.productos = DB.productos.filter(p => p.id !== id);
+            guardarDatos();
+            cargarSelectProductos();
+            cargarFiltroProductos();
+            actualizarListaProductos();
+            mostrarToast('🗑️ Producto eliminado');
+        }
+
+        // ==================== CUADRE ====================
         function actualizarCuadre() {
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-            
-            if (!fechaInicio || !fechaFin) return;
-            
-            const inicio = new Date(fechaInicio);
-            const fin = new Date(fechaFin);
+            const fi = document.getElementById('fechaInicio').value;
+            const ff = document.getElementById('fechaFin').value;
+            if (!fi || !ff) return;
+
+            const inicio = new Date(fi);
+            const fin = new Date(ff);
             fin.setHours(23, 59, 59);
-            
-            const transaccionesPeriodo = DB.transacciones.filter(t => {
-                const fecha = new Date(t.fecha);
-                return fecha >= inicio && fecha <= fin;
+
+            const trans = DB.transacciones.filter(t => {
+                const f = new Date(t.fecha);
+                return f >= inicio && f <= fin;
             });
-            
-            let totalEfectivo = 0;
-            let totalTransferencia = 0;
-            
-            transaccionesPeriodo.forEach(t => {
-                if (t.metodoPago === 'EFECTIVO') totalEfectivo += t.monto;
-                else if (t.metodoPago === 'TRANSFERENCIA') totalTransferencia += t.monto;
+
+            let totEf = 0, totTr = 0;
+            trans.forEach(t => {
+                if (t.metodoPago === 'EFECTIVO') totEf += t.monto;
+                else if (t.metodoPago === 'TRANSFERENCIA') totTr += t.monto;
             });
-            
-            document.getElementById('totalEfectivo').textContent = `$${totalEfectivo.toFixed(2)}`;
-            document.getElementById('totalTransferencia').textContent = `$${totalTransferencia.toFixed(2)}`;
-            document.getElementById('totalGeneral').textContent = `$${(totalEfectivo + totalTransferencia).toFixed(2)}`;
-            
-            const detalleProductos = {};
+
+            document.getElementById('totalEfectivo').textContent = '$' + totEf.toFixed(2);
+            document.getElementById('totalTransferencia').textContent = '$' + totTr.toFixed(2);
+            document.getElementById('totalGeneral').textContent = '$' + (totEf + totTr).toFixed(2);
+
+            // Detalle productos
+            const detalle = {};
             DB.productos.forEach(p => {
-                detalleProductos[p.id] = {
-                    nombre: p.nombre,
-                    stockInicial: p.stock,
-                    entradas: 0,
-                    ventas: 0,
-                    subtotal: 0
-                };
+                detalle[p.id] = { nombre: p.nombre, stockInicial: p.stock, entradas: 0, ventas: 0, subtotal: 0 };
             });
-            
-            transaccionesPeriodo.forEach(t => {
-                if (t.productoId && detalleProductos[t.productoId]) {
+
+            trans.forEach(t => {
+                if (t.productoId && detalle[t.productoId]) {
                     if (t.tipo === 'ENTRADA_PRODUCTO') {
-                        detalleProductos[t.productoId].entradas += t.cantidad;
-                        detalleProductos[t.productoId].stockInicial -= t.cantidad;
+                        detalle[t.productoId].entradas += t.cantidad;
+                        detalle[t.productoId].stockInicial -= t.cantidad;
                     } else if (t.tipo === 'VENTA') {
-                        detalleProductos[t.productoId].ventas += t.cantidad;
-                        detalleProductos[t.productoId].subtotal += t.monto;
-                        detalleProductos[t.productoId].stockInicial += t.cantidad;
+                        detalle[t.productoId].ventas += t.cantidad;
+                        detalle[t.productoId].subtotal += t.monto;
+                        detalle[t.productoId].stockInicial += t.cantidad;
                     }
                 }
             });
-            
-            const tablaCuadre = document.getElementById('tablaCuadre');
-            let totalSubtotal = 0;
-            
-            tablaCuadre.innerHTML = Object.values(detalleProductos).map(d => {
-                const stockFinal = d.stockInicial + d.entradas - d.ventas;
-                totalSubtotal += d.subtotal;
-                return `
-                    <tr>
-                        <td><strong>${d.nombre}</strong></td>
-                        <td>${d.stockInicial + d.ventas - d.entradas}</td>
-                        <td>${d.entradas}</td>
-                        <td>${d.ventas}</td>
-                        <td>${stockFinal}</td>
-                        <td>$${d.subtotal.toFixed(2)}</td>
-                    </tr>
-                `;
-            }).join('');
-            
-            tablaCuadre.innerHTML += `
-                <tr class="total-row">
-                    <td><strong>TOTAL</strong></td>
-                    <td></td><td></td><td></td><td></td>
-                    <td><strong>$${totalSubtotal.toFixed(2)}</strong></td>
-                </tr>
-            `;
-            
-            const tablaTransacciones = document.getElementById('tablaTransacciones');
-            if (transaccionesPeriodo.length === 0) {
-                tablaTransacciones.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No hay transacciones en este período</td></tr>';
+
+            const filas = Object.values(detalle).filter(d => d.entradas > 0 || d.ventas > 0);
+            const tCuadre = document.getElementById('tablaCuadre');
+            let totSub = 0;
+
+            if (filas.length === 0) {
+                tCuadre.innerHTML = '<tr><td colspan="6" class="empty-state">Sin movimientos en este período</td></tr>';
             } else {
-                tablaTransacciones.innerHTML = transaccionesPeriodo
-                    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-                    .slice(0, 50)
-                    .map(t => `
-                        <tr>
-                            <td>${new Date(t.fecha).toLocaleDateString()}</td>
-                            <td><span class="badge ${t.tipo === 'VENTA' ? 'badge-warning' : t.tipo === 'ENTRADA_PRODUCTO' ? 'badge-primary' : 'badge-success'}">${t.tipo.replace('_', ' ')}</span></td>
-                            <td>${t.productoNombre || t.concepto || '-'}</td>
-                            <td>${t.cantidad}</td>
-                            <td>$${t.monto.toFixed(2)}</td>
-                        </tr>
-                    `).join('');
+                tCuadre.innerHTML = filas.map(d => {
+                    const sf = d.stockInicial + d.entradas - d.ventas;
+                    totSub += d.subtotal;
+                    return `<tr><td><strong>${d.nombre}</strong></td><td>${d.stockInicial + d.ventas - d.entradas}</td><td>${d.entradas}</td><td>${d.ventas}</td><td>${sf}</td><td>$${d.subtotal.toFixed(2)}</td></tr>`;
+                }).join('') + `<tr class="total-row"><td><strong>TOTAL</strong></td><td></td><td></td><td></td><td></td><td><strong>$${totSub.toFixed(2)}</strong></td></tr>`;
+            }
+
+            // Tabla transacciones
+            const tTrans = document.getElementById('tablaTransacciones');
+            if (trans.length === 0) {
+                tTrans.innerHTML = '<tr><td colspan="5" class="empty-state">Sin transacciones</td></tr>';
+            } else {
+                tTrans.innerHTML = trans.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 100).map(t => `
+                    <tr>
+                        <td>${new Date(t.fecha).toLocaleDateString()}</td>
+                        <td><span class="badge ${t.tipo === 'VENTA' ? 'badge-warning' : t.tipo === 'ENTRADA_PRODUCTO' ? 'badge-primary' : 'badge-success'}">${t.tipo.replace('_', ' ')}</span></td>
+                        <td>${t.productoNombre || t.concepto || '-'}</td>
+                        <td>${t.cantidad} ${t.productoUnidad}</td>
+                        <td>$${t.monto.toFixed(2)}</td>
+                    </tr>
+                `).join('');
             }
         }
 
-        // ============================================
-        // EXPORTAR A EXCEL
-        // ============================================
-        function exportarExcel() {
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-            
-            if (!fechaInicio || !fechaFin) {
-                mostrarToast('⚠️ Seleccione un rango de fechas');
-                return;
+        // ==================== BÚSQUEDA AVANZADA ====================
+        function cargarFiltroProductos() {
+            const select = document.getElementById('filtroProducto');
+            if (!select) return;
+            select.innerHTML = '<option value="">Todos</option>';
+            DB.productos.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
+            });
+        }
+
+        function setFiltroBusqueda(filtro, el) {
+            document.querySelectorAll('#panelBuscar .filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            filtroBusquedaActual = filtro;
+            busquedaAvanzada();
+        }
+
+        function busquedaAvanzada() {
+            const busqueda = (document.getElementById('busquedaGlobal')?.value || '').toLowerCase();
+            const filtroProd = document.getElementById('filtroProducto')?.value || '';
+            const montoMin = parseFloat(document.getElementById('montoMin')?.value) || 0;
+            const montoMax = parseFloat(document.getElementById('montoMax')?.value) || Infinity;
+            const filtroUnidad = document.getElementById('filtroUnidad')?.value || '';
+
+            let resultados = [...DB.transacciones];
+
+            // Filtro de tipo
+            if (filtroBusquedaActual !== 'todas') {
+                if (filtroBusquedaActual === 'EFECTIVO') {
+                    resultados = resultados.filter(t => t.metodoPago === 'EFECTIVO');
+                } else if (filtroBusquedaActual === 'TRANSFERENCIA') {
+                    resultados = resultados.filter(t => t.metodoPago === 'TRANSFERENCIA');
+                } else {
+                    resultados = resultados.filter(t => t.tipo === filtroBusquedaActual);
+                }
             }
-            
+
+            // Búsqueda por texto
+            if (busqueda) {
+                resultados = resultados.filter(t => 
+                    (t.productoNombre && t.productoNombre.toLowerCase().includes(busqueda)) ||
+                    (t.concepto && t.concepto.toLowerCase().includes(busqueda)) ||
+                    t.monto.toString().includes(busqueda) ||
+                    t.cantidad.toString().includes(busqueda) ||
+                    (t.productoUnidad && t.productoUnidad.toLowerCase().includes(busqueda))
+                );
+            }
+
+            // Filtro por producto
+            if (filtroProd) {
+                resultados = resultados.filter(t => t.productoId == filtroProd);
+            }
+
+            // Filtro por monto
+            if (montoMin > 0 || montoMax < Infinity) {
+                resultados = resultados.filter(t => t.monto >= montoMin && t.monto <= montoMax);
+            }
+
+            // Filtro por unidad
+            if (filtroUnidad) {
+                resultados = resultados.filter(t => t.productoUnidad === filtroUnidad);
+            }
+
+            resultados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            document.getElementById('contadorResultados').textContent = resultados.length;
+
+            const tbody = document.getElementById('tablaBusqueda');
+            if (resultados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No se encontraron resultados</td></tr>';
+            } else {
+                tbody.innerHTML = resultados.slice(0, 200).map(t => `
+                    <tr>
+                        <td>${new Date(t.fecha).toLocaleDateString()}</td>
+                        <td><span class="badge ${t.tipo === 'VENTA' ? 'badge-warning' : t.tipo === 'ENTRADA_PRODUCTO' ? 'badge-primary' : 'badge-success'}">${t.tipo.replace('_', ' ')}</span></td>
+                        <td><strong>${t.productoNombre || t.concepto || '-'}</strong></td>
+                        <td>${t.cantidad}</td>
+                        <td>$${t.monto.toFixed(2)}</td>
+                        <td><span class="unidad-badge">${t.productoUnidad || '-'}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // ==================== EXPORTAR EXCEL ====================
+        function exportarExcel() {
+            const fi = document.getElementById('fechaInicio').value;
+            const ff = document.getElementById('fechaFin').value;
+            if (!fi || !ff) { mostrarToast('⚠️ Seleccione rango de fechas'); return; }
+
             const wb = XLSX.utils.book_new();
-            
-            const productosData = DB.productos.map(p => ({
+
+            // Hoja Productos
+            const prodData = DB.productos.map(p => ({
                 'ID': p.id,
                 'Producto': p.nombre,
-                'Valor Unitario': p.valor,
-                'Stock Actual': p.stock
+                'Precio_Unitario': p.valor,
+                'Unidad_Medida': p.unidad || 'Unidad',
+                'Stock_Actual': p.stock
             }));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productosData), 'Productos');
-            
-            const inicio = new Date(fechaInicio);
-            const fin = new Date(fechaFin);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(prodData), 'Productos');
+
+            // Hoja Transacciones
+            const inicio = new Date(fi);
+            const fin = new Date(ff);
             fin.setHours(23, 59, 59);
-            
-            const transaccionesFiltradas = DB.transacciones
+
+            const transData = DB.transacciones
                 .filter(t => { const f = new Date(t.fecha); return f >= inicio && f <= fin; })
                 .map(t => ({
+                    'ID': t.id,
                     'Fecha': new Date(t.fecha).toLocaleDateString(),
                     'Tipo': t.tipo.replace('_', ' '),
                     'Producto': t.productoNombre || t.concepto || '-',
                     'Cantidad': t.cantidad,
+                    'Unidad': t.productoUnidad || '',
                     'Monto': t.monto,
-                    'Método de Pago': t.metodoPago || '-',
+                    'Valor_Unitario': t.valorUnitario || 0,
+                    'Metodo_Pago': t.metodoPago || '-',
                     'Concepto': t.concepto || '-'
                 }));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transaccionesFiltradas), 'Transacciones');
-            
-            XLSX.writeFile(wb, `Cuadre_${fechaInicio}_${fechaFin}.xlsx`);
-            mostrarToast('📥 Excel exportado exitosamente');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transData), 'Transacciones');
+
+            XLSX.writeFile(wb, `Cuadre_${fi}_${ff}.xlsx`);
+            mostrarToast('📥 Excel exportado');
         }
 
-        // ============================================
-        // IMPORTAR DESDE EXCEL
-        // ============================================
+        // ==================== IMPORTAR EXCEL (CORREGIDO) ====================
         function importarExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    
+                    let nuevos = 0, actualizados = 0;
+
+                    // IMPORTAR PRODUCTOS
                     if (workbook.SheetNames.includes('Productos')) {
                         const prodData = XLSX.utils.sheet_to_json(workbook.Sheets['Productos']);
+                        
                         prodData.forEach(row => {
-                            if (!DB.productos.find(p => p.id === row['ID'])) {
+                            const id = row['ID'];
+                            const nombre = row['Producto'] || '';
+                            const valor = parseFloat(row['Precio_Unitario'] || row['Valor_Unitario']) || 0;
+                            const unidad = row['Unidad_Medida'] || row['Unidad'] || 'Unidad';
+                            const stock = parseInt(row['Stock_Actual'] || row['Stock']) || 0;
+
+                            if (!nombre) return;
+
+                            // Buscar producto existente por ID o nombre
+                            let prod = DB.productos.find(p => p.id === id);
+                            if (!prod) prod = DB.productos.find(p => p.nombre.toLowerCase() === nombre.toLowerCase());
+
+                            if (prod) {
+                                // ACTUALIZAR existente
+                                prod.nombre = nombre;
+                                prod.valor = valor;
+                                prod.unidad = unidad;
+                                prod.stock = stock;
+                                actualizados++;
+                                console.log('✅ Producto actualizado:', nombre);
+                            } else {
+                                // CREAR nuevo
                                 DB.productos.push({
-                                    id: row['ID'] || Date.now(),
-                                    nombre: row['Producto'] || 'Sin nombre',
-                                    valor: parseFloat(row['Valor Unitario']) || 0,
-                                    stock: parseInt(row['Stock Actual']) || 0
+                                    id: id || Date.now(),
+                                    nombre: nombre,
+                                    valor: valor,
+                                    unidad: unidad,
+                                    stock: stock
                                 });
+                                nuevos++;
+                                console.log('➕ Producto nuevo:', nombre);
                             }
                         });
                     }
-                    
+
+                    // IMPORTAR TRANSACCIONES
                     if (workbook.SheetNames.includes('Transacciones')) {
                         const transData = XLSX.utils.sheet_to_json(workbook.Sheets['Transacciones']);
+                        
                         transData.forEach(row => {
-                            const prod = DB.productos.find(p => p.nombre === row['Producto']);
-                            DB.transacciones.push({
-                                id: Date.now() + Math.random(),
-                                tipo: row['Tipo'].replace(' ', '_'),
-                                productoId: prod ? prod.id : 0,
-                                productoNombre: row['Producto'] || '',
-                                cantidad: parseInt(row['Cantidad']) || 0,
-                                monto: parseFloat(row['Monto']) || 0,
-                                metodoPago: row['Método de Pago'] || '',
-                                concepto: row['Concepto'] || '',
-                                fecha: new Date(row['Fecha']).toISOString() || new Date().toISOString(),
-                                valorUnitario: prod ? prod.valor : 0
-                            });
+                            const transId = row['ID'];
+                            const tipo = (row['Tipo'] || '').replace(' ', '_');
+                            const nombreProd = row['Producto'] || '';
+                            const cantidad = parseInt(row['Cantidad']) || 0;
+                            const monto = parseFloat(row['Monto']) || 0;
+                            const metodoPago = row['Metodo_Pago'] || '';
+                            const concepto = row['Concepto'] || '';
+                            const valorUnit = parseFloat(row['Valor_Unitario']) || 0;
+                            const unidad = row['Unidad'] || '';
+
+                            // No importar si ya existe el ID
+                            if (transId && DB.transacciones.find(t => t.id === transId)) {
+                                console.log('⏭️ Transacción ya existe, omitiendo:', transId);
+                                return;
+                            }
+
+                            if (tipo && monto > 0) {
+                                const prod = DB.productos.find(p => p.nombre === nombreProd);
+                                
+                                DB.transacciones.push({
+                                    id: transId || Date.now() + Math.random(),
+                                    tipo: tipo,
+                                    productoId: prod ? prod.id : 0,
+                                    productoNombre: nombreProd || concepto,
+                                    productoUnidad: unidad || (prod ? prod.unidad : ''),
+                                    cantidad: cantidad,
+                                    monto: monto,
+                                    metodoPago: metodoPago,
+                                    concepto: concepto,
+                                    fecha: row['Fecha'] ? new Date(row['Fecha']).toISOString() : new Date().toISOString(),
+                                    valorUnitario: valorUnit || (prod ? prod.valor : 0)
+                                });
+
+                                // Actualizar stock
+                                if (prod) {
+                                    if (tipo === 'ENTRADA_PRODUCTO') prod.stock += cantidad;
+                                    else if (tipo === 'VENTA') prod.stock -= cantidad;
+                                }
+                                nuevos++;
+                            }
                         });
                     }
-                    
+
                     guardarDatos();
-                    cargarProductosSelect();
+                    cargarSelectProductos();
+                    cargarFiltroProductos();
                     actualizarCuadre();
                     actualizarListaProductos();
-                    mostrarToast('📤 Datos importados exitosamente');
+
+                    mostrarToast(`📤 ${nuevos} nuevos, ${actualizados} actualizados`);
+                    console.log('✅ Importación completada:', { nuevos, actualizados });
+
                 } catch (error) {
+                    console.error('❌ Error importando:', error);
                     mostrarToast('❌ Error al importar: ' + error.message);
                 }
             };
+
             reader.readAsArrayBuffer(file);
-            event.target.value = '';
+            event.target.value = ''; // Limpiar input
         }
 
-        // Iniciar
+        // ==================== INICIAR ====================
         window.addEventListener('load', init);
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
     </script>
 </body>
 </html>
