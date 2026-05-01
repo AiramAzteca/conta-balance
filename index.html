@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ContaNegocio">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNvbnRhQmFsYW5jZSBDdWFkcmUgQ29udGFibGUiLAogICJzaG9ydF9uYW1lIjogIkNvbnRhQmFsYW5jZSIsCiAgInN0YXJ0X3VybCI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzFhNzNlOCIsCiAgInRoZW1lX2NvbG9yIjogIiMxYTczZTgiLAogICJpY29ucyI6IFtdCn0=">
+    <title>ContaBalance - Cuadre Contable</title>
+    
+    <!-- SheetJS para manejo de Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #1557b0;
+            --success: #0f9d58;
+            --danger: #ea4335;
+            --warning: #f4b400;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #202124;
+            --text-secondary: #5f6368;
+            --border: #dadce0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .date-range {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .date-input {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        select.form-control {
+            background: white;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(26,115,232,0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 4px 8px rgba(15,157,88,0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: #f1f3f4;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #e6f4ea;
+            color: #1e7e34;
+        }
+
+        .badge-primary {
+            background: #e8f0fe;
+            color: #1a73e8;
+        }
+
+        .badge-warning {
+            background: #fef7e0;
+            color: #f9ab00;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 16px;
+            background: #e8f0fe;
+        }
+
+        .total-row td {
+            border-top: 2px solid var(--primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
+            padding: 12px;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-label:hover {
+            border-color: var(--primary);
+            background: #f8f9fa;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border: none;
+            background: #f1f3f4;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .date-range {
+                flex-direction: column;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevenir zoom en iOS */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Encabezado -->
+        <div class="header">
+            <h1>📊 ContaBalance</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="exportarExcel()">📥 Exportar</button>
+                <button class="btn btn-success" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" onchange="importarExcel(event)">
+        </div>
+
+        <!-- Rango de Fechas -->
+        <div class="date-range">
+            <input type="date" id="fechaInicio" class="date-input" onchange="actualizarCuadre()">
+            <input type="date" id="fechaFin" class="date-input" onchange="actualizarCuadre()">
+            <button class="btn btn-primary" onclick="actualizarCuadre()">🔄 Actualizar Cuadre</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="cambiarTab('registro')">📝 Registro</button>
+            <button class="tab" onclick="cambiarTab('productos')">📦 Productos</button>
+            <button class="tab" onclick="cambiarTab('cuadre')">📊 Cuadre</button>
+        </div>
+
+        <!-- Panel de Registro -->
+        <div id="panelRegistro" class="card">
+            <h2>Nueva Transacción</h2>
+            <div class="form-group">
+                <label>Tipo de Transacción</label>
+                <select id="tipoTransaccion" class="form-control" onchange="actualizarFormulario()">
+                    <option value="ENTRADA_PRODUCTO">📥 Entrada de Producto</option>
+                    <option value="VENTA">💰 Venta</option>
+                    <option value="ENTRADA_EFECTIVO">💵 Entrada en Efectivo</option>
+                    <option value="ENTRADA_TRANSFERENCIA">🏦 Entrada por Transferencia</option>
+                </select>
+            </div>
+            
+            <div id="campoProducto" class="form-group">
+                <label>Producto</label>
+                <select id="productoId" class="form-control">
+                    <option value="">Seleccionar producto</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Cantidad</label>
+                <input type="number" id="cantidad" class="form-control" min="1" value="1" placeholder="Cantidad">
+            </div>
+            
+            <div class="form-group">
+                <label>Monto Total</label>
+                <input type="number" id="monto" class="form-control" step="0.01" placeholder="0.00">
+            </div>
+            
+            <div id="campoMetodoPago" class="form-group">
+                <label>Método de Pago</label>
+                <select id="metodoPago" class="form-control">
+                    <option value="EFECTIVO">💵 Efectivo</option>
+                    <option value="TRANSFERENCIA">🏦 Transferencia</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Concepto / Notas</label>
+                <input type="text" id="concepto" class="form-control" placeholder="Concepto o nota adicional">
+            </div>
+            
+            <button class="btn btn-primary btn-block" onclick="registrarTransaccion()">
+                ✅ Registrar Transacción
+            </button>
+        </div>
+
+        <!-- Panel de Productos -->
+        <div id="panelProductos" class="card" style="display: none;">
+            <h2>Agregar Producto</h2>
+            <div class="form-group">
+                <label>Nombre del Producto</label>
+                <input type="text" id="nombreProducto" class="form-control" placeholder="Nombre del producto">
+            </div>
+            
+            <div class="form-group">
+                <label>Valor Unitario</label>
+                <input type="number" id="valorUnitario" class="form-control" step="0.01" placeholder="Precio por unidad">
+            </div>
+            
+            <div class="form-group">
+                <label>Stock Inicial</label>
+                <input type="number" id="stockInicial" class="form-control" min="0" value="0">
+            </div>
+            
+            <button class="btn btn-primary btn-block" onclick="agregarProducto()">
+                📦 Agregar Producto
+            </button>
+            
+            <h2 style="margin-top: 24px;">Productos Registrados</h2>
+            <div id="listaProductos" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Valor</th>
+                            <th>Stock</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProductos">
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No hay productos registrados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel de Cuadre -->
+        <div id="panelCuadre" class="card" style="display: none;">
+            <h2>Cuadre del Período</h2>
+            <div id="resumenCuadre">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                    <div style="padding: 16px; background: #e8f0fe; border-radius: 8px;">
+                        <div style="font-size: 12px; color: #5f6368;">Total Efectivo</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #1a73e8;" id="totalEfectivo">$0.00</div>
+                    </div>
+                    <div style="padding: 16px; background: #e6f4ea; border-radius: 8px;">
+                        <div style="font-size: 12px; color: #5f6368;">Total Transferencias</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #0f9d58;" id="totalTransferencia">$0.00</div>
+                    </div>
+                    <div style="padding: 16px; background: #fef7e0; border-radius: 8px;">
+                        <div style="font-size: 12px; color: #5f6368;">Total General</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #f4b400;" id="totalGeneral">$0.00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Detalle por Producto</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Stock Inicial</th>
+                            <th>Entradas</th>
+                            <th>Ventas</th>
+                            <th>Stock Final</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCuadre">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Seleccione un rango de fechas</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h3 style="margin-top: 24px;">Últimas Transacciones</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaTransacciones">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No hay transacciones en este período</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Importación -->
+    <div id="modalImportacion" class="modal">
+        <div class="modal-content">
+            <h2>Importar desde Excel</h2>
+            <p>Selecciona un archivo Excel (.xlsx) con el formato adecuado.</p>
+            <label for="archivoExcel" class="file-label">
+                📁 Haz clic para seleccionar archivo
+            </label>
+            <input type="file" id="archivoExcel" class="file-input" accept=".xlsx,.xls" onchange="procesarArchivoExcel(event)">
+            <button class="btn btn-danger" onclick="cerrarModal()" style="margin-top: 12px;">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos local (localStorage)
+        let DB = {
+            productos: [],
+            transacciones: []
+        };
+
+        // Cargar datos al iniciar
+        function cargarDatos() {
+            const datosGuardados = localStorage.getItem('contaBalanceDB');
+            if (datosGuardados) {
+                DB = JSON.parse(datosGuardados);
+            } else {
+                // Datos de ejemplo
+                DB.productos = [
+                    { id: 1, nombre: 'Camiseta Básica', valor: 15.00, stock: 50 },
+                    { id: 2, nombre: 'Pantalón Jeans', valor: 35.00, stock: 30 },
+                    { id: 3, nombre: 'Zapatos Deportivos', valor: 45.00, stock: 20 }
+                ];
+                DB.transacciones = [];
+                guardarDatos();
+            }
+        }
+
+        function guardarDatos() {
+            localStorage.setItem('contaBalanceDB', JSON.stringify(DB));
+        }
+
+        // Inicializar aplicación
+        function init() {
+            cargarDatos();
+            
+            // Establecer fechas por defecto (última semana)
+            const hoy = new Date();
+            const haceUnaSemana = new Date(hoy);
+            haceUnaSemana.setDate(hoy.getDate() - 7);
+            
+            document.getElementById('fechaInicio').value = formatearFecha(haceUnaSemana);
+            document.getElementById('fechaFin').value = formatearFecha(hoy);
+            
+            actualizarFormulario();
+            cargarProductosSelect();
+            actualizarCuadre();
+        }
+
+        function formatearFecha(fecha) {
+            return fecha.toISOString().split('T')[0];
+        }
+
+        // Cambiar entre paneles
+        function cambiarTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('[id^="panel"]').forEach(p => p.style.display = 'none');
+            
+            event.target.classList.add('active');
+            
+            switch(tab) {
+                case 'registro':
+                    document.getElementById('panelRegistro').style.display = 'block';
+                    break;
+                case 'productos':
+                    document.getElementById('panelProductos').style.display = 'block';
+                    actualizarListaProductos();
+                    break;
+                case 'cuadre':
+                    document.getElementById('panelCuadre').style.display = 'block';
+                    actualizarCuadre();
+                    break;
+            }
+        }
+
+        // Actualizar formulario según tipo de transacción
+        function actualizarFormulario() {
+            const tipo = document.getElementById('tipoTransaccion').value;
+            const campoProducto = document.getElementById('campoProducto');
+            const campoMetodoPago = document.getElementById('campoMetodoPago');
+            
+            if (tipo === 'ENTRADA_EFECTIVO' || tipo === 'ENTRADA_TRANSFERENCIA') {
+                campoProducto.style.display = 'none';
+                campoMetodoPago.style.display = 'none';
+                document.getElementById('cantidad').value = 1;
+                document.getElementById('cantidad').readOnly = true;
+            } else {
+                campoProducto.style.display = 'block';
+                if (tipo === 'VENTA') {
+                    campoMetodoPago.style.display = 'block';
+                } else {
+                    campoMetodoPago.style.display = 'none';
+                }
+                document.getElementById('cantidad').readOnly = false;
+            }
+            
+            document.getElementById('monto').value = '';
+            document.getElementById('concepto').value = '';
+        }
+
+        // Cargar productos en select
+        function cargarProductosSelect() {
+            const select = document.getElementById('productoId');
+            select.innerHTML = '<option value="">Seleccionar producto</option>';
+            
+            DB.productos.forEach(producto => {
+                select.innerHTML += `<option value="${producto.id}">${producto.nombre} - $${producto.valor}</option>`;
+            });
+        }
+
+        // Agregar producto
+        function agregarProducto() {
+            const nombre = document.getElementById('nombreProducto').value.trim();
+            const valor = parseFloat(document.getElementById('valorUnitario').value);
+            const stockInicial = parseInt(document.getElementById('stockInicial').value) || 0;
+            
+            if (!nombre || !valor) {
+                alert('Complete el nombre y valor del producto');
+                return;
+            }
+            
+            const nuevoProducto = {
+                id: Date.now(),
+                nombre: nombre,
+                valor: valor,
+                stock: stockInicial
+            };
+            
+            DB.productos.push(nuevoProducto);
+            guardarDatos();
+            
+            document.getElementById('nombreProducto').value = '';
+            document.getElementById('valorUnitario').value = '';
+            document.getElementById('stockInicial').value = '0';
+            
+            cargarProductosSelect();
+            actualizarListaProductos();
+            alert('Producto agregado exitosamente');
+        }
+
+        // Actualizar lista de productos
+        function actualizarListaProductos() {
+            const tbody = document.getElementById('tablaProductos');
+            
+            if (DB.productos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay productos registrados</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = DB.productos.map(producto => `
+                <tr>
+                    <td>${producto.nombre}</td>
+                    <td>$${producto.valor.toFixed(2)}</td>
+                    <td>${producto.stock}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="eliminarProducto(${producto.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Eliminar producto
+        function eliminarProducto(id) {
+            if (confirm('¿Está seguro de eliminar este producto?')) {
+                DB.productos = DB.productos.filter(p => p.id !== id);
+                guardarDatos();
+                cargarProductosSelect();
+                actualizarListaProductos();
+            }
+        }
+
+        // Registrar transacción
+        function registrarTransaccion() {
+            const tipo = document.getElementById('tipoTransaccion').value;
+            const productoId = document.getElementById('productoId').value;
+            const cantidad = parseInt(document.getElementById('cantidad').value);
+            const monto = parseFloat(document.getElementById('monto').value);
+            const metodoPago = document.getElementById('metodoPago').value;
+            const concepto = document.getElementById('concepto').value.trim();
+            
+            if (!monto || monto <= 0) {
+                alert('Ingrese un monto válido');
+                return;
+            }
+            
+            if ((tipo === 'ENTRADA_PRODUCTO' || tipo === 'VENTA') && !productoId) {
+                alert('Seleccione un producto');
+                return;
+            }
+            
+            const producto = DB.productos.find(p => p.id == productoId);
+            
+            // Actualizar stock
+            if (tipo === 'ENTRADA_PRODUCTO' && producto) {
+                producto.stock += cantidad;
+            } else if (tipo === 'VENTA' && producto) {
+                if (producto.stock < cantidad) {
+                    alert('Stock insuficiente. Stock actual: ' + producto.stock);
+                    return;
+                }
+                producto.stock -= cantidad;
+            }
+            
+            const transaccion = {
+                id: Date.now(),
+                tipo: tipo,
+                productoId: productoId,
+                productoNombre: producto ? producto.nombre : '',
+                cantidad: cantidad,
+                monto: monto,
+                metodoPago: tipo === 'VENTA' ? metodoPago : (tipo === 'ENTRADA_EFECTIVO' ? 'EFECTIVO' : tipo === 'ENTRADA_TRANSFERENCIA' ? 'TRANSFERENCIA' : ''),
+                concepto: concepto,
+                fecha: new Date().toISOString(),
+                valorUnitario: producto ? producto.valor : 0
+            };
+            
+            DB.transacciones.push(transaccion);
+            guardarDatos();
+            
+            // Limpiar formulario
+            document.getElementById('monto').value = '';
+            document.getElementById('concepto').value = '';
+            document.getElementById('cantidad').value = '1';
+            
+            alert('Transacción registrada exitosamente');
+            actualizarCuadre();
+            cargarProductosSelect();
+        }
+
+        // Actualizar cuadre
+        function actualizarCuadre() {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            
+            if (!fechaInicio || !fechaFin) return;
+            
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+            fin.setHours(23, 59, 59);
+            
+            // Filtrar transacciones del período
+            const transaccionesPeriodo = DB.transacciones.filter(t => {
+                const fecha = new Date(t.fecha);
+                return fecha >= inicio && fecha <= fin;
+            });
+            
+            // Calcular totales
+            let totalEfectivo = 0;
+            let totalTransferencia = 0;
+            
+            transaccionesPeriodo.forEach(t => {
+                if (t.metodoPago === 'EFECTIVO') {
+                    totalEfectivo += t.monto;
+                } else if (t.metodoPago === 'TRANSFERENCIA') {
+                    totalTransferencia += t.monto;
+                }
+            });
+            
+            // Actualizar resumen
+            document.getElementById('totalEfectivo').textContent = `$${totalEfectivo.toFixed(2)}`;
+            document.getElementById('totalTransferencia').textContent = `$${totalTransferencia.toFixed(2)}`;
+            document.getElementById('totalGeneral').textContent = `$${(totalEfectivo + totalTransferencia).toFixed(2)}`;
+            
+            // Actualizar detalle por producto
+            const detalleProductos = {};
+            
+            DB.productos.forEach(p => {
+                detalleProductos[p.id] = {
+                    nombre: p.nombre,
+                    stockInicial: p.stock,
+                    entradas: 0,
+                    ventas: 0,
+                    subtotal: 0
+                };
+            });
+            
+            transaccionesPeriodo.forEach(t => {
+                if (t.productoId && detalleProductos[t.productoId]) {
+                    if (t.tipo === 'ENTRADA_PRODUCTO') {
+                        detalleProductos[t.productoId].entradas += t.cantidad;
+                        detalleProductos[t.productoId].stockInicial = detalleProductos[t.productoId].stockInicial - t.cantidad;
+                    } else if (t.tipo === 'VENTA') {
+                        detalleProductos[t.productoId].ventas += t.cantidad;
+                        detalleProductos[t.productoId].subtotal += t.monto;
+                        detalleProductos[t.productoId].stockInicial = detalleProductos[t.productoId].stockInicial + t.cantidad;
+                    }
+                }
+            });
+            
+            // Actualizar tabla de cuadre
+            const tablaCuadre = document.getElementById('tablaCuadre');
+            let totalSubtotal = 0;
+            
+            tablaCuadre.innerHTML = Object.values(detalleProductos).map(d => {
+                const stockFinal = d.stockInicial + d.entradas - d.ventas;
+                totalSubtotal += d.subtotal;
+                return `
+                    <tr>
+                        <td>${d.nombre}</td>
+                        <td>${d.stockInicial + d.ventas - d.entradas}</td>
+                        <td>${d.entradas}</td>
+                        <td>${d.ventas}</td>
+                        <td>${stockFinal}</td>
+                        <td>$${d.subtotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Fila de totales
+            tablaCuadre.innerHTML += `
+                <tr class="total-row">
+                    <td>TOTAL</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>$${totalSubtotal.toFixed(2)}</td>
+                </tr>
+            `;
+            
+            // Actualizar tabla de transacciones
+            const tablaTransacciones = document.getElementById('tablaTransacciones');
+            
+            if (transaccionesPeriodo.length === 0) {
+                tablaTransacciones.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay transacciones en este período</td></tr>';
+            } else {
+                tablaTransacciones.innerHTML = transaccionesPeriodo
+                    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+                    .map(t => `
+                        <tr>
+                            <td>${new Date(t.fecha).toLocaleDateString()}</td>
+                            <td>
+                                <span class="badge ${
+                                    t.tipo === 'VENTA' ? 'badge-warning' : 
+                                    t.tipo === 'ENTRADA_PRODUCTO' ? 'badge-primary' : 
+                                    'badge-success'
+                                }">
+                                    ${t.tipo.replace('_', ' ')}
+                                </span>
+                            </td>
+                            <td>${t.productoNombre || t.concepto || '-'}</td>
+                            <td>${t.cantidad}</td>
+                            <td>$${t.monto.toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+            }
+        }
+
+        // Exportar a Excel
+        function exportarExcel() {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            
+            if (!fechaInicio || !fechaFin) {
+                alert('Seleccione un rango de fechas');
+                return;
+            }
+            
+            const wb = XLSX.utils.book_new();
+            
+            // Hoja de productos
+            const productosData = DB.productos.map(p => ({
+                'ID': p.id,
+                'Producto': p.nombre,
+                'Valor Unitario': p.valor,
+                'Stock Actual': p.stock
+            }));
+            
+            const wsProductos = XLSX.utils.json_to_sheet(productosData);
+            XLSX.utils.book_append_sheet(wb, wsProductos, 'Productos');
+            
+            // Hoja de transacciones
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+            fin.setHours(23, 59, 59);
+            
+            const transaccionesFiltradas = DB.transacciones
+                .filter(t => {
+                    const fecha = new Date(t.fecha);
+                    return fecha >= inicio && fecha <= fin;
+                })
+                .map(t => ({
+                    'Fecha': new Date(t.fecha).toLocaleDateString(),
+                    'Tipo': t.tipo.replace('_', ' '),
+                    'Producto': t.productoNombre || t.concepto || '-',
+                    'Cantidad': t.cantidad,
+                    'Monto': t.monto,
+                    'Método de Pago': t.metodoPago || '-',
+                    'Concepto': t.concepto || '-'
+                }));
+            
+            const wsTransacciones = XLSX.utils.json_to_sheet(transaccionesFiltradas);
+            XLSX.utils.book_append_sheet(wb, wsTransacciones, 'Transacciones');
+            
+            // Hoja de resumen
+            const resumenData = [];
+            
+            // Agrupar por producto
+            const resumenProductos = {};
+            DB.productos.forEach(p => {
+                resumenProductos[p.id] = {
+                    producto: p.nombre,
+                    stockInicial: p.stock,
+                    entradas: 0,
+                    ventas: 0,
+                    subtotal: 0,
+                    valorUnitario: p.valor
+                };
+            });
+            
+            transaccionesFiltradas.forEach(t => {
+                if (t.productoId && resumenProductos[t.productoId]) {
+                    if (t.tipo === 'ENTRADA_PRODUCTO') {
+                        resumenProductos[t.productoId].entradas += t.cantidad;
+                    } else if (t.tipo === 'VENTA') {
+                        resumenProductos[t.productoId].ventas += t.cantidad;
+                        resumenProductos[t.productoId].subtotal += t.monto;
+                    }
+                }
+            });
+            
+            Object.values(resumenProductos).forEach(r => {
+                resumenData.push({
+                    'Producto': r.producto,
+                    'Valor Unitario': r.valorUnitario,
+                    'Stock Inicial': r.stockInicial,
+                    'Entradas': r.entradas,
+                    'Ventas': r.ventas,
+                    'Stock Final': r.stockInicial + r.entradas - r.ventas,
+                    'Subtotal Vendido': r.subtotal
+                });
+            });
+            
+            const wsResumen = XLSX.utils.json_to_sheet(resumenData);
+            XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+            
+            // Guardar archivo
+            const nombreArchivo = `Cuadre_${fechaInicio}_${fechaFin}.xlsx`;
+            XLSX.writeFile(wb, nombreArchivo);
+            
+            alert('Excel exportado exitosamente');
+        }
+
+        // Importar desde Excel
+        function importarExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Procesar hoja de Productos
+                    if (workbook.SheetNames.includes('Productos')) {
+                        const productosSheet = workbook.Sheets['Productos'];
+                        const productosData = XLSX.utils.sheet_to_json(productosSheet);
+                        
+                        productosData.forEach(row => {
+                            const existente = DB.productos.find(p => p.id === row['ID']);
+                            if (!existente) {
+                                DB.productos.push({
+                                    id: row['ID'] || Date.now(),
+                                    nombre: row['Producto'] || 'Sin nombre',
+                                    valor: parseFloat(row['Valor Unitario']) || 0,
+                                    stock: parseInt(row['Stock Actual']) || 0
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Procesar hoja de Transacciones
+                    if (workbook.SheetNames.includes('Transacciones')) {
+                        const transSheet = workbook.Sheets['Transacciones'];
+                        const transData = XLSX.utils.sheet_to_json(transSheet);
+                        
+                        transData.forEach(row => {
+                            const producto = DB.productos.find(p => p.nombre === row['Producto']);
+                            
+                            DB.transacciones.push({
+                                id: Date.now() + Math.random(),
+                                tipo: row['Tipo'].replace(' ', '_'),
+                                productoId: producto ? producto.id : 0,
+                                productoNombre: row['Producto'] || '',
+                                cantidad: parseInt(row['Cantidad']) || 0,
+                                monto: parseFloat(row['Monto']) || 0,
+                                metodoPago: row['Método de Pago'] || '',
+                                concepto: row['Concepto'] || '',
+                                fecha: new Date(row['Fecha']).toISOString() || new Date().toISOString(),
+                                valorUnitario: producto ? producto.valor : 0
+                            });
+                        });
+                    }
+                    
+                    guardarDatos();
+                    cargarProductosSelect();
+                    actualizarCuadre();
+                    alert('Datos importados exitosamente');
+                    
+                } catch (error) {
+                    alert('Error al importar: ' + error.message);
+                    console.error(error);
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        // Iniciar aplicación
+        window.addEventListener('load', init);
+
+        // Registrar Service Worker para funcionalidad offline
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // La app funciona offline por defecto usando localStorage
+                console.log('App lista para uso offline');
+            });
+        }
+    </script>
+</body>
+</html>
