@@ -2,16 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1a73e8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ContaNegocio">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNvbnRhQmFsYW5jZSBDdWFkcmUgQ29udGFibGUiLAogICJzaG9ydF9uYW1lIjogIkNvbnRhQmFsYW5jZSIsCiAgInN0YXJ0X3VybCI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzFhNzNlOCIsCiAgInRoZW1lX2NvbG9yIjogIiMxYTczZTgiLAogICJpY29ucyI6IFtdCn0=">
+    <meta name="apple-mobile-web-app-title" content="ContaBalance">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="ContaBalance">
+    <meta name="description" content="App de cuadre contable para negocios">
+    
+    <!-- Manifest para instalación PWA -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Iconos para iOS -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a73e8'/><text x='50' y='65' text-anchor='middle' fill='white' font-size='50'>📊</text></svg>">
+    
     <title>ContaBalance - Cuadre Contable</title>
     
     <!-- SheetJS para manejo de Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
     
     <style>
         :root {
@@ -25,6 +34,7 @@
             --text: #202124;
             --text-secondary: #5f6368;
             --border: #dadce0;
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
         }
 
         * {
@@ -34,11 +44,16 @@
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 16px;
+            padding-bottom: calc(16px + var(--safe-bottom));
             color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
         }
 
         .container {
@@ -48,101 +63,149 @@
 
         .header {
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .header h1 {
             font-size: 24px;
             color: var(--primary);
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .header-actions {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .install-banner {
+            background: var(--primary);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .install-banner.show {
+            display: flex;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .date-range {
             background: var(--card);
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 20px;
+            padding: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
         }
 
         .date-input {
-            flex: 1;
-            min-width: 120px;
-            padding: 10px;
+            padding: 12px;
             border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: white;
         }
 
         .card {
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
         }
 
         .card h2 {
-            font-size: 18px;
+            font-size: 20px;
             margin-bottom: 16px;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 4px;
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: var(--text-secondary);
             font-size: 14px;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px;
+            padding: 14px;
             border: 2px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
         }
 
         select.form-control {
-            background: white;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%235f6368' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 14px 24px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
         }
 
         .btn-primary {
@@ -152,8 +215,7 @@
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(26,115,232,0.3);
+            box-shadow: 0 4px 12px rgba(26,115,232,0.3);
         }
 
         .btn-success {
@@ -161,19 +223,21 @@
             color: white;
         }
 
-        .btn-success:hover {
-            box-shadow: 0 4px 8px rgba(15,157,88,0.3);
-        }
-
         .btn-danger {
             background: var(--danger);
             color: white;
+            padding: 8px 12px;
+            font-size: 14px;
         }
 
         .btn-block {
             width: 100%;
-            justify-content: center;
-            margin-top: 12px;
+            margin-top: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
         }
 
         table {
@@ -181,46 +245,43 @@
             border-collapse: collapse;
             margin-top: 16px;
             font-size: 14px;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
         th {
             background: var(--primary);
             color: white;
-            padding: 12px;
+            padding: 14px 12px;
             text-align: left;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 13px;
         }
 
         td {
-            padding: 12px;
+            padding: 14px 12px;
             border-bottom: 1px solid var(--border);
         }
 
+        tr:last-child td {
+            border-bottom: none;
+        }
+
         tr:hover {
-            background: #f1f3f4;
+            background: #f8f9fa;
         }
 
         .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
+            display: inline-block;
         }
 
-        .badge-success {
-            background: #e6f4ea;
-            color: #1e7e34;
-        }
-
-        .badge-primary {
-            background: #e8f0fe;
-            color: #1a73e8;
-        }
-
-        .badge-warning {
-            background: #fef7e0;
-            color: #f9ab00;
-        }
+        .badge-success { background: #e6f4ea; color: #1e7e34; }
+        .badge-primary { background: #e8f0fe; color: #1a73e8; }
+        .badge-warning { background: #fef7e0; color: #f9ab00; }
 
         .total-row {
             font-weight: bold;
@@ -232,123 +293,203 @@
             border-top: 2px solid var(--primary);
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .file-label {
-            display: block;
-            padding: 12px;
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-label:hover {
-            border-color: var(--primary);
-            background: #f8f9fa;
-        }
+        .file-input { display: none; }
 
         .tabs {
             display: flex;
             gap: 8px;
             margin-bottom: 16px;
             overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tab {
-            padding: 8px 16px;
+            padding: 12px 20px;
             border: none;
-            background: #f1f3f4;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 25px;
             cursor: pointer;
             white-space: nowrap;
+            font-weight: 600;
+            font-size: 14px;
             transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .tab.active {
             background: var(--primary);
             color: white;
+            box-shadow: 0 4px 8px rgba(26,115,232,0.3);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .summary-card .label {
+            font-size: 12px;
+            color: #5f6368;
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .card-efectivo { background: #e8f0fe; }
+        .card-efectivo .value { color: #1a73e8; }
+        .card-transferencia { background: #e6f4ea; }
+        .card-transferencia .value { color: #0f9d58; }
+        .card-total { background: #fef7e0; }
+        .card-total .value { color: #f4b400; }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .offline-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #e6f4ea;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e7e34;
+        }
+
+        .offline-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #1e7e34;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 1000;
+            animation: toastIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(-50%) translateY(100%); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        @keyframes toastOut {
+            from { transform: translateX(-50%) translateY(0); opacity: 1; }
+            to { transform: translateX(-50%) translateY(100%); opacity: 0; }
         }
 
         @media (max-width: 600px) {
             body {
-                padding: 8px;
+                padding: 12px;
+                padding-bottom: calc(12px + var(--safe-bottom));
             }
             
             .header {
                 flex-direction: column;
-                gap: 12px;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .header-actions {
+                justify-content: center;
             }
             
             .date-range {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
             
-            .form-control {
-                font-size: 16px; /* Prevenir zoom en iOS */
+            .tab {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Banner de instalación -->
+    <div class="install-banner" id="installBanner">
+        <span>📲 Instala la app para acceso rápido</span>
+        <button class="btn btn-sm" style="background: white; color: var(--primary);" onclick="instalarApp()">
+            Instalar
+        </button>
+    </div>
+
     <div class="container">
         <!-- Encabezado -->
         <div class="header">
             <h1>📊 ContaBalance</h1>
-            <div class="header-actions">
-                <button class="btn btn-primary" onclick="exportarExcel()">📥 Exportar</button>
-                <button class="btn btn-success" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="offline-badge">Offline</span>
+                <div class="header-actions">
+                    <button class="btn btn-primary btn-sm" onclick="exportarExcel()">📥</button>
+                    <button class="btn btn-success btn-sm" onclick="document.getElementById('fileInput').click()">📤</button>
+                </div>
             </div>
             <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" onchange="importarExcel(event)">
         </div>
 
         <!-- Rango de Fechas -->
         <div class="date-range">
-            <input type="date" id="fechaInicio" class="date-input" onchange="actualizarCuadre()">
-            <input type="date" id="fechaFin" class="date-input" onchange="actualizarCuadre()">
-            <button class="btn btn-primary" onclick="actualizarCuadre()">🔄 Actualizar Cuadre</button>
+            <div>
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Desde</label>
+                <input type="date" id="fechaInicio" class="date-input" onchange="actualizarCuadre()" style="width: 100%;">
+            </div>
+            <div>
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Hasta</label>
+                <input type="date" id="fechaFin" class="date-input" onchange="actualizarCuadre()" style="width: 100%;">
+            </div>
+            <button class="btn btn-primary" onclick="actualizarCuadre()">🔄 Actualizar</button>
         </div>
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab active" onclick="cambiarTab('registro')">📝 Registro</button>
-            <button class="tab" onclick="cambiarTab('productos')">📦 Productos</button>
-            <button class="tab" onclick="cambiarTab('cuadre')">📊 Cuadre</button>
+            <button class="tab active" onclick="cambiarTab('registro', this)">📝 Registro</button>
+            <button class="tab" onclick="cambiarTab('productos', this)">📦 Productos</button>
+            <button class="tab" onclick="cambiarTab('cuadre', this)">📊 Cuadre</button>
         </div>
 
         <!-- Panel de Registro -->
         <div id="panelRegistro" class="card">
-            <h2>Nueva Transacción</h2>
+            <h2>📝 Nueva Transacción</h2>
             <div class="form-group">
                 <label>Tipo de Transacción</label>
                 <select id="tipoTransaccion" class="form-control" onchange="actualizarFormulario()">
@@ -376,7 +517,7 @@
                 <input type="number" id="monto" class="form-control" step="0.01" placeholder="0.00">
             </div>
             
-            <div id="campoMetodoPago" class="form-group">
+            <div id="campoMetodoPago" class="form-group" style="display: none;">
                 <label>Método de Pago</label>
                 <select id="metodoPago" class="form-control">
                     <option value="EFECTIVO">💵 Efectivo</option>
@@ -396,7 +537,7 @@
 
         <!-- Panel de Productos -->
         <div id="panelProductos" class="card" style="display: none;">
-            <h2>Agregar Producto</h2>
+            <h2>📦 Agregar Producto</h2>
             <div class="form-group">
                 <label>Nombre del Producto</label>
                 <input type="text" id="nombreProducto" class="form-control" placeholder="Nombre del producto">
@@ -417,7 +558,7 @@
             </button>
             
             <h2 style="margin-top: 24px;">Productos Registrados</h2>
-            <div id="listaProductos" style="overflow-x: auto;">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
@@ -428,9 +569,7 @@
                         </tr>
                     </thead>
                     <tbody id="tablaProductos">
-                        <tr>
-                            <td colspan="4" style="text-align: center;">No hay productos registrados</td>
-                        </tr>
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No hay productos registrados</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -438,26 +577,25 @@
 
         <!-- Panel de Cuadre -->
         <div id="panelCuadre" class="card" style="display: none;">
-            <h2>Cuadre del Período</h2>
-            <div id="resumenCuadre">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;">
-                    <div style="padding: 16px; background: #e8f0fe; border-radius: 8px;">
-                        <div style="font-size: 12px; color: #5f6368;">Total Efectivo</div>
-                        <div style="font-size: 24px; font-weight: bold; color: #1a73e8;" id="totalEfectivo">$0.00</div>
-                    </div>
-                    <div style="padding: 16px; background: #e6f4ea; border-radius: 8px;">
-                        <div style="font-size: 12px; color: #5f6368;">Total Transferencias</div>
-                        <div style="font-size: 24px; font-weight: bold; color: #0f9d58;" id="totalTransferencia">$0.00</div>
-                    </div>
-                    <div style="padding: 16px; background: #fef7e0; border-radius: 8px;">
-                        <div style="font-size: 12px; color: #5f6368;">Total General</div>
-                        <div style="font-size: 24px; font-weight: bold; color: #f4b400;" id="totalGeneral">$0.00</div>
-                    </div>
+            <h2>📊 Cuadre del Período</h2>
+            
+            <div class="summary-cards">
+                <div class="summary-card card-efectivo">
+                    <div class="label">Total Efectivo</div>
+                    <div class="value" id="totalEfectivo">$0.00</div>
+                </div>
+                <div class="summary-card card-transferencia">
+                    <div class="label">Total Transferencia</div>
+                    <div class="value" id="totalTransferencia">$0.00</div>
+                </div>
+                <div class="summary-card card-total">
+                    <div class="label">Total General</div>
+                    <div class="value" id="totalGeneral">$0.00</div>
                 </div>
             </div>
             
             <h3>Detalle por Producto</h3>
-            <div style="overflow-x: auto;">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
@@ -470,15 +608,13 @@
                         </tr>
                     </thead>
                     <tbody id="tablaCuadre">
-                        <tr>
-                            <td colspan="6" style="text-align: center;">Seleccione un rango de fechas</td>
-                        </tr>
+                        <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Seleccione un rango de fechas</td></tr>
                     </tbody>
                 </table>
             </div>
             
             <h3 style="margin-top: 24px;">Últimas Transacciones</h3>
-            <div style="overflow-x: auto;">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
@@ -490,42 +626,73 @@
                         </tr>
                     </thead>
                     <tbody id="tablaTransacciones">
-                        <tr>
-                            <td colspan="5" style="text-align: center;">No hay transacciones en este período</td>
-                        </tr>
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No hay transacciones en este período</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Importación -->
-    <div id="modalImportacion" class="modal">
-        <div class="modal-content">
-            <h2>Importar desde Excel</h2>
-            <p>Selecciona un archivo Excel (.xlsx) con el formato adecuado.</p>
-            <label for="archivoExcel" class="file-label">
-                📁 Haz clic para seleccionar archivo
-            </label>
-            <input type="file" id="archivoExcel" class="file-input" accept=".xlsx,.xls" onchange="procesarArchivoExcel(event)">
-            <button class="btn btn-danger" onclick="cerrarModal()" style="margin-top: 12px;">Cancelar</button>
-        </div>
-    </div>
-
     <script>
-        // Base de datos local (localStorage)
+        // ============================================
+        // REGISTRO DEL SERVICE WORKER PARA OFFLINE
+        // ============================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Service Worker falló:', error);
+                    });
+            });
+        }
+
+        // ============================================
+        // VARIABLE PARA INSTALACIÓN PWA
+        // ============================================
+        let deferredPrompt;
+        const installBanner = document.getElementById('installBanner');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBanner.classList.add('show');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBanner.classList.remove('show');
+            deferredPrompt = null;
+            mostrarToast('✅ App instalada exitosamente');
+        });
+
+        function instalarApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó instalar');
+                    }
+                    deferredPrompt = null;
+                    installBanner.classList.remove('show');
+                });
+            }
+        }
+
+        // ============================================
+        // BASE DE DATOS LOCAL
+        // ============================================
         let DB = {
             productos: [],
             transacciones: []
         };
 
-        // Cargar datos al iniciar
         function cargarDatos() {
             const datosGuardados = localStorage.getItem('contaBalanceDB');
             if (datosGuardados) {
                 DB = JSON.parse(datosGuardados);
             } else {
-                // Datos de ejemplo
                 DB.productos = [
                     { id: 1, nombre: 'Camiseta Básica', valor: 15.00, stock: 50 },
                     { id: 2, nombre: 'Pantalón Jeans', valor: 35.00, stock: 30 },
@@ -540,11 +707,28 @@
             localStorage.setItem('contaBalanceDB', JSON.stringify(DB));
         }
 
-        // Inicializar aplicación
+        function formatearFecha(fecha) {
+            return fecha.toISOString().split('T')[0];
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = mensaje;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
         function init() {
             cargarDatos();
             
-            // Establecer fechas por defecto (última semana)
             const hoy = new Date();
             const haceUnaSemana = new Date(hoy);
             haceUnaSemana.setDate(hoy.getDate() - 7);
@@ -555,18 +739,19 @@
             actualizarFormulario();
             cargarProductosSelect();
             actualizarCuadre();
+            actualizarListaProductos();
         }
 
-        function formatearFecha(fecha) {
-            return fecha.toISOString().split('T')[0];
-        }
-
-        // Cambiar entre paneles
-        function cambiarTab(tab) {
+        // ============================================
+        // NAVEGACIÓN POR TABS
+        // ============================================
+        function cambiarTab(tab, element) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('[id^="panel"]').forEach(p => p.style.display = 'none');
+            element.classList.add('active');
             
-            event.target.classList.add('active');
+            document.getElementById('panelRegistro').style.display = 'none';
+            document.getElementById('panelProductos').style.display = 'none';
+            document.getElementById('panelCuadre').style.display = 'none';
             
             switch(tab) {
                 case 'registro':
@@ -583,60 +768,58 @@
             }
         }
 
-        // Actualizar formulario según tipo de transacción
+        // ============================================
+        // FORMULARIO DINÁMICO
+        // ============================================
         function actualizarFormulario() {
             const tipo = document.getElementById('tipoTransaccion').value;
             const campoProducto = document.getElementById('campoProducto');
             const campoMetodoPago = document.getElementById('campoMetodoPago');
+            const cantidad = document.getElementById('cantidad');
             
             if (tipo === 'ENTRADA_EFECTIVO' || tipo === 'ENTRADA_TRANSFERENCIA') {
                 campoProducto.style.display = 'none';
                 campoMetodoPago.style.display = 'none';
-                document.getElementById('cantidad').value = 1;
-                document.getElementById('cantidad').readOnly = true;
+                cantidad.value = 1;
+                cantidad.readOnly = true;
             } else {
                 campoProducto.style.display = 'block';
-                if (tipo === 'VENTA') {
-                    campoMetodoPago.style.display = 'block';
-                } else {
-                    campoMetodoPago.style.display = 'none';
-                }
-                document.getElementById('cantidad').readOnly = false;
+                campoMetodoPago.style.display = tipo === 'VENTA' ? 'block' : 'none';
+                cantidad.readOnly = false;
             }
             
             document.getElementById('monto').value = '';
             document.getElementById('concepto').value = '';
         }
 
-        // Cargar productos en select
         function cargarProductosSelect() {
             const select = document.getElementById('productoId');
             select.innerHTML = '<option value="">Seleccionar producto</option>';
-            
-            DB.productos.forEach(producto => {
-                select.innerHTML += `<option value="${producto.id}">${producto.nombre} - $${producto.valor}</option>`;
+            DB.productos.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.nombre} - $${p.valor.toFixed(2)}</option>`;
             });
         }
 
-        // Agregar producto
+        // ============================================
+        // GESTIÓN DE PRODUCTOS
+        // ============================================
         function agregarProducto() {
             const nombre = document.getElementById('nombreProducto').value.trim();
             const valor = parseFloat(document.getElementById('valorUnitario').value);
             const stockInicial = parseInt(document.getElementById('stockInicial').value) || 0;
             
             if (!nombre || !valor) {
-                alert('Complete el nombre y valor del producto');
+                mostrarToast('⚠️ Complete nombre y valor del producto');
                 return;
             }
             
-            const nuevoProducto = {
+            DB.productos.push({
                 id: Date.now(),
                 nombre: nombre,
                 valor: valor,
                 stock: stockInicial
-            };
+            });
             
-            DB.productos.push(nuevoProducto);
             guardarDatos();
             
             document.getElementById('nombreProducto').value = '';
@@ -645,41 +828,39 @@
             
             cargarProductosSelect();
             actualizarListaProductos();
-            alert('Producto agregado exitosamente');
+            mostrarToast('✅ Producto agregado exitosamente');
         }
 
-        // Actualizar lista de productos
         function actualizarListaProductos() {
             const tbody = document.getElementById('tablaProductos');
-            
             if (DB.productos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay productos registrados</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No hay productos registrados</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = DB.productos.map(producto => `
+            tbody.innerHTML = DB.productos.map(p => `
                 <tr>
-                    <td>${producto.nombre}</td>
-                    <td>$${producto.valor.toFixed(2)}</td>
-                    <td>${producto.stock}</td>
-                    <td>
-                        <button class="btn btn-danger" onclick="eliminarProducto(${producto.id})">🗑️</button>
-                    </td>
+                    <td><strong>${p.nombre}</strong></td>
+                    <td>$${p.valor.toFixed(2)}</td>
+                    <td>${p.stock}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.id})">🗑️</button></td>
                 </tr>
             `).join('');
         }
 
-        // Eliminar producto
         function eliminarProducto(id) {
-            if (confirm('¿Está seguro de eliminar este producto?')) {
+            if (confirm('¿Eliminar este producto?')) {
                 DB.productos = DB.productos.filter(p => p.id !== id);
                 guardarDatos();
                 cargarProductosSelect();
                 actualizarListaProductos();
+                mostrarToast('🗑️ Producto eliminado');
             }
         }
 
-        // Registrar transacción
+        // ============================================
+        // REGISTRO DE TRANSACCIONES
+        // ============================================
         function registrarTransaccion() {
             const tipo = document.getElementById('tipoTransaccion').value;
             const productoId = document.getElementById('productoId').value;
@@ -689,23 +870,22 @@
             const concepto = document.getElementById('concepto').value.trim();
             
             if (!monto || monto <= 0) {
-                alert('Ingrese un monto válido');
+                mostrarToast('⚠️ Ingrese un monto válido');
                 return;
             }
             
             if ((tipo === 'ENTRADA_PRODUCTO' || tipo === 'VENTA') && !productoId) {
-                alert('Seleccione un producto');
+                mostrarToast('⚠️ Seleccione un producto');
                 return;
             }
             
             const producto = DB.productos.find(p => p.id == productoId);
             
-            // Actualizar stock
             if (tipo === 'ENTRADA_PRODUCTO' && producto) {
                 producto.stock += cantidad;
             } else if (tipo === 'VENTA' && producto) {
                 if (producto.stock < cantidad) {
-                    alert('Stock insuficiente. Stock actual: ' + producto.stock);
+                    mostrarToast('⚠️ Stock insuficiente. Disponible: ' + producto.stock);
                     return;
                 }
                 producto.stock -= cantidad;
@@ -727,17 +907,18 @@
             DB.transacciones.push(transaccion);
             guardarDatos();
             
-            // Limpiar formulario
             document.getElementById('monto').value = '';
             document.getElementById('concepto').value = '';
             document.getElementById('cantidad').value = '1';
             
-            alert('Transacción registrada exitosamente');
+            mostrarToast('✅ Transacción registrada exitosamente');
             actualizarCuadre();
             cargarProductosSelect();
         }
 
-        // Actualizar cuadre
+        // ============================================
+        // CUADRE Y REPORTES
+        // ============================================
         function actualizarCuadre() {
             const fechaInicio = document.getElementById('fechaInicio').value;
             const fechaFin = document.getElementById('fechaFin').value;
@@ -748,32 +929,24 @@
             const fin = new Date(fechaFin);
             fin.setHours(23, 59, 59);
             
-            // Filtrar transacciones del período
             const transaccionesPeriodo = DB.transacciones.filter(t => {
                 const fecha = new Date(t.fecha);
                 return fecha >= inicio && fecha <= fin;
             });
             
-            // Calcular totales
             let totalEfectivo = 0;
             let totalTransferencia = 0;
             
             transaccionesPeriodo.forEach(t => {
-                if (t.metodoPago === 'EFECTIVO') {
-                    totalEfectivo += t.monto;
-                } else if (t.metodoPago === 'TRANSFERENCIA') {
-                    totalTransferencia += t.monto;
-                }
+                if (t.metodoPago === 'EFECTIVO') totalEfectivo += t.monto;
+                else if (t.metodoPago === 'TRANSFERENCIA') totalTransferencia += t.monto;
             });
             
-            // Actualizar resumen
             document.getElementById('totalEfectivo').textContent = `$${totalEfectivo.toFixed(2)}`;
             document.getElementById('totalTransferencia').textContent = `$${totalTransferencia.toFixed(2)}`;
             document.getElementById('totalGeneral').textContent = `$${(totalEfectivo + totalTransferencia).toFixed(2)}`;
             
-            // Actualizar detalle por producto
             const detalleProductos = {};
-            
             DB.productos.forEach(p => {
                 detalleProductos[p.id] = {
                     nombre: p.nombre,
@@ -788,16 +961,15 @@
                 if (t.productoId && detalleProductos[t.productoId]) {
                     if (t.tipo === 'ENTRADA_PRODUCTO') {
                         detalleProductos[t.productoId].entradas += t.cantidad;
-                        detalleProductos[t.productoId].stockInicial = detalleProductos[t.productoId].stockInicial - t.cantidad;
+                        detalleProductos[t.productoId].stockInicial -= t.cantidad;
                     } else if (t.tipo === 'VENTA') {
                         detalleProductos[t.productoId].ventas += t.cantidad;
                         detalleProductos[t.productoId].subtotal += t.monto;
-                        detalleProductos[t.productoId].stockInicial = detalleProductos[t.productoId].stockInicial + t.cantidad;
+                        detalleProductos[t.productoId].stockInicial += t.cantidad;
                     }
                 }
             });
             
-            // Actualizar tabla de cuadre
             const tablaCuadre = document.getElementById('tablaCuadre');
             let totalSubtotal = 0;
             
@@ -806,7 +978,7 @@
                 totalSubtotal += d.subtotal;
                 return `
                     <tr>
-                        <td>${d.nombre}</td>
+                        <td><strong>${d.nombre}</strong></td>
                         <td>${d.stockInicial + d.ventas - d.entradas}</td>
                         <td>${d.entradas}</td>
                         <td>${d.ventas}</td>
@@ -816,38 +988,25 @@
                 `;
             }).join('');
             
-            // Fila de totales
             tablaCuadre.innerHTML += `
                 <tr class="total-row">
-                    <td>TOTAL</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>$${totalSubtotal.toFixed(2)}</td>
+                    <td><strong>TOTAL</strong></td>
+                    <td></td><td></td><td></td><td></td>
+                    <td><strong>$${totalSubtotal.toFixed(2)}</strong></td>
                 </tr>
             `;
             
-            // Actualizar tabla de transacciones
             const tablaTransacciones = document.getElementById('tablaTransacciones');
-            
             if (transaccionesPeriodo.length === 0) {
-                tablaTransacciones.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay transacciones en este período</td></tr>';
+                tablaTransacciones.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No hay transacciones en este período</td></tr>';
             } else {
                 tablaTransacciones.innerHTML = transaccionesPeriodo
                     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+                    .slice(0, 50)
                     .map(t => `
                         <tr>
                             <td>${new Date(t.fecha).toLocaleDateString()}</td>
-                            <td>
-                                <span class="badge ${
-                                    t.tipo === 'VENTA' ? 'badge-warning' : 
-                                    t.tipo === 'ENTRADA_PRODUCTO' ? 'badge-primary' : 
-                                    'badge-success'
-                                }">
-                                    ${t.tipo.replace('_', ' ')}
-                                </span>
-                            </td>
+                            <td><span class="badge ${t.tipo === 'VENTA' ? 'badge-warning' : t.tipo === 'ENTRADA_PRODUCTO' ? 'badge-primary' : 'badge-success'}">${t.tipo.replace('_', ' ')}</span></td>
                             <td>${t.productoNombre || t.concepto || '-'}</td>
                             <td>${t.cantidad}</td>
                             <td>$${t.monto.toFixed(2)}</td>
@@ -856,39 +1015,34 @@
             }
         }
 
-        // Exportar a Excel
+        // ============================================
+        // EXPORTAR A EXCEL
+        // ============================================
         function exportarExcel() {
             const fechaInicio = document.getElementById('fechaInicio').value;
             const fechaFin = document.getElementById('fechaFin').value;
             
             if (!fechaInicio || !fechaFin) {
-                alert('Seleccione un rango de fechas');
+                mostrarToast('⚠️ Seleccione un rango de fechas');
                 return;
             }
             
             const wb = XLSX.utils.book_new();
             
-            // Hoja de productos
             const productosData = DB.productos.map(p => ({
                 'ID': p.id,
                 'Producto': p.nombre,
                 'Valor Unitario': p.valor,
                 'Stock Actual': p.stock
             }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productosData), 'Productos');
             
-            const wsProductos = XLSX.utils.json_to_sheet(productosData);
-            XLSX.utils.book_append_sheet(wb, wsProductos, 'Productos');
-            
-            // Hoja de transacciones
             const inicio = new Date(fechaInicio);
             const fin = new Date(fechaFin);
             fin.setHours(23, 59, 59);
             
             const transaccionesFiltradas = DB.transacciones
-                .filter(t => {
-                    const fecha = new Date(t.fecha);
-                    return fecha >= inicio && fecha <= fin;
-                })
+                .filter(t => { const f = new Date(t.fecha); return f >= inicio && f <= fin; })
                 .map(t => ({
                     'Fecha': new Date(t.fecha).toLocaleDateString(),
                     'Tipo': t.tipo.replace('_', ' '),
@@ -898,60 +1052,15 @@
                     'Método de Pago': t.metodoPago || '-',
                     'Concepto': t.concepto || '-'
                 }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transaccionesFiltradas), 'Transacciones');
             
-            const wsTransacciones = XLSX.utils.json_to_sheet(transaccionesFiltradas);
-            XLSX.utils.book_append_sheet(wb, wsTransacciones, 'Transacciones');
-            
-            // Hoja de resumen
-            const resumenData = [];
-            
-            // Agrupar por producto
-            const resumenProductos = {};
-            DB.productos.forEach(p => {
-                resumenProductos[p.id] = {
-                    producto: p.nombre,
-                    stockInicial: p.stock,
-                    entradas: 0,
-                    ventas: 0,
-                    subtotal: 0,
-                    valorUnitario: p.valor
-                };
-            });
-            
-            transaccionesFiltradas.forEach(t => {
-                if (t.productoId && resumenProductos[t.productoId]) {
-                    if (t.tipo === 'ENTRADA_PRODUCTO') {
-                        resumenProductos[t.productoId].entradas += t.cantidad;
-                    } else if (t.tipo === 'VENTA') {
-                        resumenProductos[t.productoId].ventas += t.cantidad;
-                        resumenProductos[t.productoId].subtotal += t.monto;
-                    }
-                }
-            });
-            
-            Object.values(resumenProductos).forEach(r => {
-                resumenData.push({
-                    'Producto': r.producto,
-                    'Valor Unitario': r.valorUnitario,
-                    'Stock Inicial': r.stockInicial,
-                    'Entradas': r.entradas,
-                    'Ventas': r.ventas,
-                    'Stock Final': r.stockInicial + r.entradas - r.ventas,
-                    'Subtotal Vendido': r.subtotal
-                });
-            });
-            
-            const wsResumen = XLSX.utils.json_to_sheet(resumenData);
-            XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
-            
-            // Guardar archivo
-            const nombreArchivo = `Cuadre_${fechaInicio}_${fechaFin}.xlsx`;
-            XLSX.writeFile(wb, nombreArchivo);
-            
-            alert('Excel exportado exitosamente');
+            XLSX.writeFile(wb, `Cuadre_${fechaInicio}_${fechaFin}.xlsx`);
+            mostrarToast('📥 Excel exportado exitosamente');
         }
 
-        // Importar desde Excel
+        // ============================================
+        // IMPORTAR DESDE EXCEL
+        // ============================================
         function importarExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -962,14 +1071,10 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     
-                    // Procesar hoja de Productos
                     if (workbook.SheetNames.includes('Productos')) {
-                        const productosSheet = workbook.Sheets['Productos'];
-                        const productosData = XLSX.utils.sheet_to_json(productosSheet);
-                        
-                        productosData.forEach(row => {
-                            const existente = DB.productos.find(p => p.id === row['ID']);
-                            if (!existente) {
+                        const prodData = XLSX.utils.sheet_to_json(workbook.Sheets['Productos']);
+                        prodData.forEach(row => {
+                            if (!DB.productos.find(p => p.id === row['ID'])) {
                                 DB.productos.push({
                                     id: row['ID'] || Date.now(),
                                     nombre: row['Producto'] || 'Sin nombre',
@@ -980,25 +1085,21 @@
                         });
                     }
                     
-                    // Procesar hoja de Transacciones
                     if (workbook.SheetNames.includes('Transacciones')) {
-                        const transSheet = workbook.Sheets['Transacciones'];
-                        const transData = XLSX.utils.sheet_to_json(transSheet);
-                        
+                        const transData = XLSX.utils.sheet_to_json(workbook.Sheets['Transacciones']);
                         transData.forEach(row => {
-                            const producto = DB.productos.find(p => p.nombre === row['Producto']);
-                            
+                            const prod = DB.productos.find(p => p.nombre === row['Producto']);
                             DB.transacciones.push({
                                 id: Date.now() + Math.random(),
                                 tipo: row['Tipo'].replace(' ', '_'),
-                                productoId: producto ? producto.id : 0,
+                                productoId: prod ? prod.id : 0,
                                 productoNombre: row['Producto'] || '',
                                 cantidad: parseInt(row['Cantidad']) || 0,
                                 monto: parseFloat(row['Monto']) || 0,
                                 metodoPago: row['Método de Pago'] || '',
                                 concepto: row['Concepto'] || '',
                                 fecha: new Date(row['Fecha']).toISOString() || new Date().toISOString(),
-                                valorUnitario: producto ? producto.valor : 0
+                                valorUnitario: prod ? prod.valor : 0
                             });
                         });
                     }
@@ -1006,28 +1107,18 @@
                     guardarDatos();
                     cargarProductosSelect();
                     actualizarCuadre();
-                    alert('Datos importados exitosamente');
-                    
+                    actualizarListaProductos();
+                    mostrarToast('📤 Datos importados exitosamente');
                 } catch (error) {
-                    alert('Error al importar: ' + error.message);
-                    console.error(error);
+                    mostrarToast('❌ Error al importar: ' + error.message);
                 }
             };
-            
             reader.readAsArrayBuffer(file);
             event.target.value = '';
         }
 
-        // Iniciar aplicación
+        // Iniciar
         window.addEventListener('load', init);
-
-        // Registrar Service Worker para funcionalidad offline
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // La app funciona offline por defecto usando localStorage
-                console.log('App lista para uso offline');
-            });
-        }
     </script>
 </body>
 </html>
